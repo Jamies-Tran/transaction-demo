@@ -1,4 +1,23 @@
 services:
+  transaction-log-demo-db:
+    image: mongo:latest
+    container_name: transaction-log-demo-db
+    networks:
+      - transaction-log-network
+    volumes:
+      - demo-db:/demo/db
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: TRANSACTION_LOG_DEMO
+      MONGO_INITDB_ROOT_PASSWORD: 123
+      MONGO_INITDB_DATABASE: transaction-log-demo
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      retries: 3
+      interval: 5s
+      timeout: 10s
+
   transaction-log-demo-service:
     build: .
     container_name: transaction-log-demo-service
@@ -11,6 +30,14 @@ services:
       FEIGN_TRANSACTION_LOG_SAVE: /v1/history-log
       FEIGN_TRANSACTION_LOG_FILTER_ID: /v1/history-log/{id}
       FEIGN_TRANSACTION_LOG_FILTER_TRANSACTION_ID: /v1/history-log/transactions/{transactionId}
+      SPRING_DATA_MONGODB_USERNAME: TRANSACTION_LOG_DEMO
+      SPRING_DATA_MONGODB_PASSWORD: 123
+      SPRING_DATA_MONGODB_AUTHENTICATION-DATABASE: transaction-log-demo
+      SPRING_DATA_MONGODB_HOST: transaction-log-demo-db
+      SPRING_DATA_MONGODB_PORT: 27017
+    depends_on:
+      transaction-log-demo-db:
+        condition: service_healthy
 
   transaction-log-demo-nginx:
     image: nginx:latest
@@ -27,3 +54,6 @@ services:
 networks:
   transaction-log-network:
     external: true
+
+volumes:
+  demo-db:
