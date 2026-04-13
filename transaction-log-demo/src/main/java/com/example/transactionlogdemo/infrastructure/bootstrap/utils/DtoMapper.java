@@ -7,7 +7,7 @@ public interface DtoMapper<Dto, Domain> {
 
     Domain toDomain(Dto entity);
 
-    List<Dto> toEntity(List<Domain> domain);
+    List<Dto> toDto(List<Domain> domain);
 
     List<Domain> toDomain(List<Dto> dto);
 }

@@ -1,4 +1,4 @@
-package com.example.transactionlogdemo.infrastructure.persistence.entity.transaction.schema.authentication;
+package com.example.transactionlogdemo.infrastructure.persistence.entity.transaction.authentication;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

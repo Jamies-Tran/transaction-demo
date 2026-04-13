@@ -1,7 +1,8 @@
 package com.example.transactionlogdemo.infrastructure.persistence.entity.transaction;
 
+import com.example.transactionlogdemo.infrastructure.persistence.entity.transaction.retry.RetryDocument;
 import com.example.transactionlogdemo.infrastructure.persistence.entity.transaction.schema.DataSchemaDocument;
-import com.example.transactionlogdemo.infrastructure.persistence.entity.transaction.schema.authentication.AuthenticationDocument;
+import com.example.transactionlogdemo.infrastructure.persistence.entity.transaction.authentication.AuthenticationDocument;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,5 +21,6 @@ public class TransactionDocument {
     String name;
     DataSchemaDocument data;
     AuthenticationDocument authentication;
+    RetryDocument retry;
     List<String> dependsOn;
 }

@@ -7,5 +7,5 @@ import com.example.transactionlogdemo.infrastructure.bootstrap.utils.DtoMapper;
 import org.mapstruct.Mapper;
 
 @Mapper(config = MapStructGlobalConfig.class)
-public interface TransactionRequestMapping extends DtoMapper<TransactionRequest, Transaction> {
+public interface TransactionRequestMapper extends DtoMapper<TransactionRequest, Transaction> {
 }
