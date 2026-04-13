@@ -9,9 +9,9 @@ public interface WorkflowService {
 
     Optional<Workflow> getById(String workflowId);
 
-    Workflow inactive(String workflowId);
+    Workflow inactivate(String workflowId);
 
-    Workflow active(String workflowId);
+    Workflow activate(String workflowId);
 
     void remove(String workflowId);
 }

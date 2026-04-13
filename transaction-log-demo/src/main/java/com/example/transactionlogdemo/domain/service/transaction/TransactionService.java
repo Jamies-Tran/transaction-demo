@@ -12,5 +12,5 @@ public interface TransactionService {
 
     List<Transaction> getAllByCodeIn(List<String> codes);
 
-    void removeByCode(String code);
+    void removeByCode(String transactionCode);
 }
