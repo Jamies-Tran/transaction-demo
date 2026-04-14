@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -26,31 +27,15 @@ public class TransactionPersistenceAdapter implements TransactionRepository {
 
     @Override
     public Transaction upsert(Transaction transaction) {
-        MongoCriteria criteria = MongoCriteria.builder()
-                .field(MongoCriteria.Field.builder()
-                        .key("id")
-                        .value(transaction.id())
-                        .build())
-                .compareOperator(MongoCriteria.EnumCompareOperator.EQUAL)
-                .or(List.of(MongoCriteria.builder()
-                        .field(MongoCriteria.Field.builder()
-                                .key("code")
-                                .value(transaction.code())
-                                .build())
-                        .compareOperator(MongoCriteria.EnumCompareOperator.EQUAL)
-                        .build()))
-                .build();
-        Optional<TransactionDocument> t = Optional.ofNullable(mongoTemplate.findOne(criteria.buildQuery(), TransactionDocument.class));
-        if (t.isPresent()) {
-            TransactionDocument prepareSaveDocument = t.get();
-            entityMapper.update(prepareSaveDocument, transaction);
-            TransactionDocument saveDocument = mongoTemplate.save(prepareSaveDocument);
-            return entityMapper.toDomain(saveDocument);
+        Transaction upsertTransaction = null;
+        if (Objects.nonNull(transaction.id()) || Objects.nonNull(transaction.code())) {
+            upsertTransaction = update(transaction);
         }
-        TransactionDocument prepareSaveDocument = entityMapper.toEntity(transaction);
-        TransactionDocument saveDocument = mongoTemplate.save(prepareSaveDocument);
+        if (Objects.isNull(upsertTransaction)) {
+            upsertTransaction = save(transaction);
+        }
 
-        return entityMapper.toDomain(saveDocument);
+        return upsertTransaction;
     }
 
     @Override
@@ -91,5 +76,58 @@ public class TransactionPersistenceAdapter implements TransactionRepository {
                 .compareOperator(MongoCriteria.EnumCompareOperator.IN)
                 .build();
         mongoTemplate.remove(criteria.buildQuery());
+    }
+
+    private Transaction save(Transaction transaction) {
+        TransactionDocument prepareSaveDocument = entityMapper.toEntity(transaction);
+        TransactionDocument saveDocument = mongoTemplate.save(prepareSaveDocument);
+
+        return entityMapper.toDomain(saveDocument);
+    }
+
+    private Transaction update(Transaction transaction) {
+        MongoCriteria.MongoCriteriaBuilder criteriaBuilder = MongoCriteria.builder();
+        if (Objects.nonNull(transaction.id())) {
+            criteriaBuilder
+                    .field(MongoCriteria.Field.builder()
+                            .key("id")
+                            .value(transaction.id())
+                            .build())
+                    .compareOperator(MongoCriteria.EnumCompareOperator.EQUAL);
+        }
+        if (Objects.nonNull(transaction.code())) {
+            criteriaBuilder
+                    .field(MongoCriteria.Field.builder()
+                            .key("code")
+                            .value(transaction.code())
+                            .build())
+                    .compareOperator(MongoCriteria.EnumCompareOperator.EQUAL);
+        }
+        if (Objects.nonNull(transaction.id()) && Objects.nonNull(transaction.code())) {
+            criteriaBuilder
+                    .field(MongoCriteria.Field.builder()
+                            .key("id")
+                            .value(transaction.id())
+                            .build())
+                    .compareOperator(MongoCriteria.EnumCompareOperator.EQUAL)
+                    .or(List.of(MongoCriteria.builder()
+                            .field(MongoCriteria.Field.builder()
+                                    .key("code")
+                                    .value(transaction.code())
+                                    .build())
+                            .compareOperator(MongoCriteria.EnumCompareOperator.EQUAL)
+                            .build()));
+        }
+        MongoCriteria criteria = criteriaBuilder.build();
+        Optional<TransactionDocument> t = Optional.ofNullable(mongoTemplate.findOne(criteria.buildQuery(),
+                TransactionDocument.class));
+        if (t.isPresent()) {
+            TransactionDocument prepareSaveDocument = t.get();
+            entityMapper.update(prepareSaveDocument, transaction);
+            TransactionDocument saveDocument = mongoTemplate.save(prepareSaveDocument);
+            return entityMapper.toDomain(saveDocument);
+        }
+
+        return null;
     }
 }

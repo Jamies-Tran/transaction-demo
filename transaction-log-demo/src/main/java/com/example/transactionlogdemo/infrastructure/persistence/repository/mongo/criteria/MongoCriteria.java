@@ -177,7 +177,7 @@ public record MongoCriteria(
             }
         }
         if (!CollectionUtils.isEmpty(or)) {
-            for (MongoCriteria mongoCriteria : and) {
+            for (MongoCriteria mongoCriteria : or) {
                 Field f = mongoCriteria.field;
                 Criteria c = Criteria.where(f.key);
                 switch (mongoCriteria.compareOperator) {
