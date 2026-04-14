@@ -9,9 +9,8 @@ services:
     ports:
       - "27018:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: TRANSACTION_LOG_DEMO
+      MONGO_INITDB_ROOT_USERNAME: transaction-log-demo
       MONGO_INITDB_ROOT_PASSWORD: 123
-      MONGO_INITDB_DATABASE: transaction-log-demo
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       retries: 3
@@ -30,11 +29,12 @@ services:
       FEIGN_TRANSACTION_LOG_SAVE: /v1/history-log
       FEIGN_TRANSACTION_LOG_FILTER_ID: /v1/history-log/{id}
       FEIGN_TRANSACTION_LOG_FILTER_TRANSACTION_ID: /v1/history-log/transactions/{transactionId}
-      SPRING_DATA_MONGODB_USERNAME: TRANSACTION_LOG_DEMO
+      SPRING_DATA_MONGODB_USERNAME: transaction-log-demo
       SPRING_DATA_MONGODB_PASSWORD: 123
-      SPRING_DATA_MONGODB_AUTHENTICATION-DATABASE: transaction-log-demo
+      SPRING_DATA_MONGODB_AUTHENTICATION-DATABASE: admin
       SPRING_DATA_MONGODB_HOST: transaction-log-demo-db
       SPRING_DATA_MONGODB_PORT: 27017
+      SERVER_PORT: 8081
     depends_on:
       transaction-log-demo-db:
         condition: service_healthy

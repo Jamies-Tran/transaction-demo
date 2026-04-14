@@ -1,4 +1,4 @@
-package com.example.transactionlogdemo.application.mapper.workflow;
+package com.example.transactionlogdemo.application.mapper.request.workflow;
 
 import com.example.transactionlogdemo.application.dto.request.workflow.WorkflowRequest;
 import com.example.transactionlogdemo.domain.entity.workflow.Workflow;
