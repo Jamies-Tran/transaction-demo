@@ -8,8 +8,7 @@ import java.util.List;
 
 public record Transaction(
         String id,
-        String routeId,
-
+        String routeCode,
         String code,
         String name,
         DataSchema data,

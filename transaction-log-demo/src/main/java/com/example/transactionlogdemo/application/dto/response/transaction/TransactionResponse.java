@@ -10,7 +10,7 @@ import java.util.List;
 
 public record TransactionResponse(
         String id,
-        String routeId,
+        String routeCode,
         String code,
         String name,
         DataSchemaResponse data,

@@ -16,7 +16,7 @@ import java.util.List;
 @Document("transactions")
 public class TransactionDocument {
     String id;
-    String routeId;
+    String routeCode;
     String code;
     String name;
     DataSchemaDocument data;

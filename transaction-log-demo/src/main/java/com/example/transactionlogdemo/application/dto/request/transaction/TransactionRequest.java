@@ -9,7 +9,7 @@ import com.example.transactionlogdemo.domain.entity.transaction.schema.DataSchem
 import java.util.List;
 
 public record TransactionRequest(
-        String routeId,
+        String routeCode,
         String code,
         String name,
         DataSchemaRequest data,
