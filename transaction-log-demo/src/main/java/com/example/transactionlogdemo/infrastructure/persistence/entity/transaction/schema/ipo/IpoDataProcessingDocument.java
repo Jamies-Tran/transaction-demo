@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class IpoDataProcessingDocument {
     String scope;
-    String field;
     String label;
+    Object field;
 }
