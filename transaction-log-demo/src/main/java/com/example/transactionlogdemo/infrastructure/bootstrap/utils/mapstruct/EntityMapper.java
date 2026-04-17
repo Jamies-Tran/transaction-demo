@@ -1,4 +1,4 @@
-package com.example.transactionlogdemo.infrastructure.bootstrap.utils;
+package com.example.transactionlogdemo.infrastructure.bootstrap.utils.mapstruct;
 
 import java.util.List;
 
