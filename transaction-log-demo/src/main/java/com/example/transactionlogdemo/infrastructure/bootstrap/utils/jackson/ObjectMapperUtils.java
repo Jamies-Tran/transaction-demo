@@ -1,5 +1,6 @@
 package com.example.transactionlogdemo.infrastructure.bootstrap.utils.jackson;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,14 @@ public class ObjectMapperUtils {
     @Autowired
     public void setObjectMapper(ObjectMapper objectMapper) {
         ObjectMapperUtils.objectMapper = objectMapper;
+    }
+
+    public static String convertToString(Map<String, Object> map) {
+        try {
+            return objectMapper.writeValueAsString(map);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static Map<String, String> buildMapping(Map<String, Object> input) {

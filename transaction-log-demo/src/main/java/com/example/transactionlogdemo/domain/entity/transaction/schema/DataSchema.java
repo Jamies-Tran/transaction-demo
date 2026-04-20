@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public record DataSchema(
-        Map<String, String> params,
-        Map<String, String> body
+        Map<String, Object> params,
+        Map<String, Object> body
 ) {
 }

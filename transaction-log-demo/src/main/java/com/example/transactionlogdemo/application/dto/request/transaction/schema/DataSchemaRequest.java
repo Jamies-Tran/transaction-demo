@@ -3,9 +3,10 @@ package com.example.transactionlogdemo.application.dto.request.transaction.schem
 import com.example.transactionlogdemo.application.dto.request.transaction.schema.ipo.IpoDataProcessingRequest;
 
 import java.util.List;
+import java.util.Map;
 
 public record DataSchemaRequest(
-        List<IpoDataProcessingRequest> requestSchema,
-        List<IpoDataProcessingRequest> responseSchema
+        Map<String, Object> params,
+        Map<String, Object> body
 ) {
 }

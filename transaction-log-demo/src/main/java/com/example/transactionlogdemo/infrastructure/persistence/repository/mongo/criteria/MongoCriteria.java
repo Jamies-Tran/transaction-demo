@@ -20,10 +20,10 @@ public record MongoCriteria(
     // MongoCriteria.builder().field().compareOperator().and(...).or(...)
 
     @Builder
-    public record Field(
+    public record Field<T>(
             String key,
-            Object value,
-            List<Object> values
+            T value,
+            List<T> values
     ) {}
 
     public enum EnumCompareOperator {

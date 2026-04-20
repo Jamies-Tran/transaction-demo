@@ -1,20 +1,22 @@
 package com.example.transactionlogdemo.infrastructure.external.dto;
 
+import com.example.transactionlogdemo.domain.entity.transaction.authentication.Authentication;
 import com.example.transactionlogdemo.domain.enums.EnumMethod;
+import lombok.Builder;
+import lombok.With;
 
 import java.util.Map;
 
+@Builder
 public record RequestDefinition(
+        @With
         EnumMethod method,
+        @With
         String uri,
         Map<String, String> header,
-        Map<String, Object> requestBody,
-        Map<String, String> requestParam,
+        Map<String, Object> body,
+        Map<String, Object> params,
         Authentication authentication
 
 ) {
-    public record Authentication(
-            String type,
-            String token
-    ) {}
 }

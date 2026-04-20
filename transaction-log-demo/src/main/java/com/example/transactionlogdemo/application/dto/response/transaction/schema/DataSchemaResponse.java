@@ -3,9 +3,10 @@ package com.example.transactionlogdemo.application.dto.response.transaction.sche
 import com.example.transactionlogdemo.application.dto.response.transaction.schema.ipo.IpoDataProcessingResponse;
 
 import java.util.List;
+import java.util.Map;
 
 public record DataSchemaResponse(
-        List<IpoDataProcessingResponse> requestSchema,
-        List<IpoDataProcessingResponse> responseSchema
+        Map<String, Object> params,
+        Map<String, Object> body
 ) {
 }

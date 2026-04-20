@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -24,6 +25,26 @@ public class WorkflowPersistenceAdapter implements WorkflowRepository {
 
     @Override
     public Workflow upsert(Workflow workflow) {
+        Workflow upsertWorkflow = null;
+        if (Objects.nonNull(workflow.id())) {
+            upsertWorkflow = update(workflow);
+        }
+
+        if (Objects.isNull(workflow.id())) {
+            upsertWorkflow = save(workflow);
+        }
+
+        return upsertWorkflow;
+    }
+
+    private Workflow save(Workflow workflow) {
+        WorkflowDocument prepareSaveDocument = entityMapper.toEntity(workflow);
+        WorkflowDocument saveDocument = mongoTemplate.save(prepareSaveDocument);
+
+        return entityMapper.toDomain(saveDocument);
+    }
+
+    private Workflow update(Workflow workflow) {
         MongoCriteria criteria = MongoCriteria.builder()
                 .field(MongoCriteria.Field.builder()
                         .key("id")
@@ -40,10 +61,8 @@ public class WorkflowPersistenceAdapter implements WorkflowRepository {
 
             return entityMapper.toDomain(saveDocument);
         }
-        WorkflowDocument prepareSaveDocument = entityMapper.toEntity(workflow);
-        WorkflowDocument saveDocument = mongoTemplate.save(prepareSaveDocument);
 
-        return entityMapper.toDomain(saveDocument);
+        return null;
     }
 
     @Override

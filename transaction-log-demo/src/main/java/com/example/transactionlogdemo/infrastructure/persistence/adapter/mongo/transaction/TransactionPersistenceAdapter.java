@@ -55,9 +55,9 @@ public class TransactionPersistenceAdapter implements TransactionRepository {
     @Override
     public List<Transaction> findAllByCodeIn(List<String> codes) {
         MongoCriteria criteria = MongoCriteria.builder()
-                .field(MongoCriteria.Field.builder()
+                .field(MongoCriteria.Field.<String>builder()
                         .key("code")
-                        .values(Collections.singletonList(codes))
+                        .values(codes)
                         .build())
                 .compareOperator(MongoCriteria.EnumCompareOperator.IN)
                 .build();

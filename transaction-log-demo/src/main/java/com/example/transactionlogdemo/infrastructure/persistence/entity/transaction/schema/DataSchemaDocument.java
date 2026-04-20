@@ -12,6 +12,6 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DataSchemaDocument {
-    Map<String, String> params;
-    Map<String, String> body;
+    Map<String, Object> params;
+    Map<String, Object> body;
 }
