@@ -22,15 +22,6 @@ public class ObjectMapperUtils {
         ObjectMapperUtils.objectMapper = objectMapper;
     }
 
-    public static String convertToString(Map<String, Object> map) {
-        try {
-            return objectMapper.writeValueAsString(map);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
     public static Map<String, String> buildMapping(Map<String, Object> input) {
         Map<String, String> result = new HashMap<>();
         traverse("", input, result);

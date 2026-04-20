@@ -9,26 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public record DataSchema(
-        List<IpoDataProcessing> requestSchema,
-        List<IpoDataProcessing> responseSchema
+        Map<String, String> params,
+        Map<String, String> body
 ) {
-    public Map<String, String> buildRequestMapping() {
-        if (CollectionUtils.isEmpty(requestSchema)) {
-            return null;
-        }
-        Map<String, Object> jsonSchema = requestSchema.stream()
-                .collect(Collectors.toMap(IpoDataProcessing::label, IpoDataProcessing::field));
-
-        return ObjectMapperUtils.buildMapping(jsonSchema);
-    }
-
-    public Map<String, String> buildResponseMapping() {
-        if (CollectionUtils.isEmpty(responseSchema)) {
-            return null;
-        }
-        Map<String, Object> jsonSchema = responseSchema.stream()
-                .collect(Collectors.toMap(IpoDataProcessing::label, IpoDataProcessing::field));
-
-        return ObjectMapperUtils.buildMapping(jsonSchema);
-    }
 }

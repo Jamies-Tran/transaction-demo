@@ -6,11 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class DataSchemaDocument {
-    List<IpoDataProcessingDocument> requestSchema;
-    List<IpoDataProcessingDocument> responseSchema;
+    Map<String, String> params;
+    Map<String, String> body;
 }
