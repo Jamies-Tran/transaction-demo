@@ -1,6 +1,6 @@
-package com.example.transactionlogdemo.application.dto.request.test;
+package com.example.transactionlogdemo.application.dto.response.test;
 
-public record TestRequest(
+public record TestResponse(
         String name,
         Info info
 ) {

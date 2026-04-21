@@ -1,6 +1,6 @@
-package com.example.transactionlogdemo.application.dto.request.test;
+package com.example.transactionlogdemo.domain.entity.test;
 
-public record TestRequest(
+public record Test(
         String name,
         Info info
 ) {

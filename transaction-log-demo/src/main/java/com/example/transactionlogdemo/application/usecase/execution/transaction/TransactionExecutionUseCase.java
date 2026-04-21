@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,26 +27,40 @@ public class TransactionExecutionUseCase implements TransactionExecutionService 
     @Override
     public void execute(List<String> transactionCodes, ExecutionContext context) {
         List<Transaction> transactions = transactionService.getAllByCodeIn(transactionCodes);
-        Map<String, RequestDefinition> requestDefinitionMap = buildRequestDefinitionData(transactions, context);
-        requestDefinitionMap.forEach(routeExecutionService::execute);
+        for (Transaction t : transactions) {
+            RequestDefinition requestDefinition = buildRequestDefinitionData(t, context);
+            Object routeResponse = routeExecutionService.execute(t.routeCode(), requestDefinition);
+            mapResponse(t.responseSchema().body(), routeResponse, context);
+        }
     }
 
-    private Map<String, RequestDefinition> buildRequestDefinitionData(
-            List<Transaction> transactions,
+    private void mapResponse(Map<String, Object> mapping, Object source, ExecutionContext context) {
+        for (Map.Entry<String, Object> m : mapping.entrySet()) {
+            String key = m.getKey();
+            Object value = m.getValue();
+            if (value instanceof String jsonPath) {
+                Object valueMapped = JsonPathUtils.read(source, jsonPath);
+                context.put(key, valueMapped);
+            }
+            if (value instanceof Map map) {
+                mapResponse(map, source, context);
+            }
+        }
+    }
+
+    private RequestDefinition buildRequestDefinitionData(
+            Transaction transaction,
             ExecutionContext context
     ) {
-        return transactions.stream()
-                .collect(Collectors.toMap(Transaction::routeCode, transaction -> {
-                    Map<String, Object> mapParams = (Map<String, Object>) JsonPathUtils.mapJson(transaction.data().params(), context.getData());
-                    Map<String, Object> mapBody = (Map<String, Object>) JsonPathUtils.mapJson(transaction.data().body(), context.getData());
-                    Authentication authentication = transaction.authentication();
+        Map<String, Object> mapParams = (Map<String, Object>) JsonPathUtils.mapJson(transaction.requestSchema().params(), context.getData());
+        Map<String, Object> mapBody = (Map<String, Object>) JsonPathUtils.mapJson(transaction.requestSchema().body(), context.getData());
+        Authentication authentication = transaction.authentication();
 
-                    return RequestDefinition.builder()
-                            .params(mapParams)
-                            .body(mapBody)
-                            .authentication(authentication)
-                            .build();
-                }));
+        return RequestDefinition.builder()
+                .params(mapParams)
+                .body(mapBody)
+                .authentication(authentication)
+                .build();
 
     }
 }

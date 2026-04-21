@@ -2,9 +2,8 @@ package com.example.transactionlogdemo.application.dto.response.transaction;
 
 import com.example.transactionlogdemo.application.dto.response.transaction.authentication.AuthenticationResponse;
 import com.example.transactionlogdemo.application.dto.response.transaction.retry.RetryResponse;
-import com.example.transactionlogdemo.application.dto.response.transaction.schema.DataSchemaResponse;
-import com.example.transactionlogdemo.domain.entity.transaction.authentication.Authentication;
-import com.example.transactionlogdemo.domain.entity.transaction.schema.DataSchema;
+import com.example.transactionlogdemo.application.dto.response.transaction.schema.DataRequestSchemaResponse;
+import com.example.transactionlogdemo.application.dto.response.transaction.schema.DataResponseSchemaResponse;
 
 import java.util.List;
 
@@ -13,7 +12,8 @@ public record TransactionResponse(
         String routeCode,
         String code,
         String name,
-        DataSchemaResponse data,
+        DataRequestSchemaResponse requestSchema,
+        DataResponseSchemaResponse responseSchema,
         AuthenticationResponse authentication,
         RetryResponse retry,
         List<String> dependsOn

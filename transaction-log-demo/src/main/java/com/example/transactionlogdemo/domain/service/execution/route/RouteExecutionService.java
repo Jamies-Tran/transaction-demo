@@ -4,5 +4,5 @@ import com.example.transactionlogdemo.domain.entity.context.execution.ExecutionC
 import com.example.transactionlogdemo.infrastructure.external.dto.RequestDefinition;
 
 public interface RouteExecutionService {
-    void execute(String routeCode, RequestDefinition requestDefinition);
+    Object execute(String routeCode, RequestDefinition requestDefinition);
 }

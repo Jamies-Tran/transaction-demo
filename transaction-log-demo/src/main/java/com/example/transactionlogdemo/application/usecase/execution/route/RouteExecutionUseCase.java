@@ -20,11 +20,12 @@ public class RouteExecutionUseCase implements RouteExecutionService {
     RouteExternalAdapter routeExternalAdapter;
 
     @Override
-    public void execute(String routeCode, RequestDefinition requestDefinition) {
+    public Object execute(String routeCode, RequestDefinition requestDefinition) {
         Route route = routeService.getByCode(routeCode)
                 .orElseThrow(RuntimeException::new);
         RequestDefinition completeRequestDefinition = buildCompleteRequestDefinition(route, requestDefinition);
-        routeExternalAdapter.execute(completeRequestDefinition);
+
+        return routeExternalAdapter.execute(completeRequestDefinition);
     }
 
     private RequestDefinition buildCompleteRequestDefinition(Route route, RequestDefinition source) {
