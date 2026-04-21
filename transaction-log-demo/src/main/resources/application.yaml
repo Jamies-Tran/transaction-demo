@@ -3,5 +3,5 @@ spring:
     name: transaction-log-demo
   data:
     mongodb:
-      uri: mongodb://transaction-log-demo:123@localhost:27017/?authSource=admin
+      uri: mongodb://transaction-log-demo:123@localhost:27018/?authSource=admin
       database: transaction

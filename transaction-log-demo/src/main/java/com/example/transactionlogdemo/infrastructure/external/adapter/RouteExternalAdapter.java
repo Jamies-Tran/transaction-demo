@@ -29,7 +29,7 @@ import java.util.Objects;
 public class RouteExternalAdapter {
     RestTemplate restTemplate;
 
-    public Object execute(RequestDefinition def) {
+    public ResponseEntity<Object> execute(RequestDefinition def) {
         String url = buildUrl(def);
         HttpHeaders headers = buildHeader(def);
         Object body = buildBody(def);
@@ -40,7 +40,7 @@ public class RouteExternalAdapter {
                 def.method().getMethod(),
                 entity,
                 Object.class
-        ).getBody();
+        );
     }
 
     private String buildUrl(RequestDefinition def) {

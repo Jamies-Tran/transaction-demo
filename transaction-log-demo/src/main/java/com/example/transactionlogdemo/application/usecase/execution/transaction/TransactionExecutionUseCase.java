@@ -29,7 +29,7 @@ public class TransactionExecutionUseCase implements TransactionExecutionService 
         List<Transaction> transactions = transactionService.getAllByCodeIn(transactionCodes);
         for (Transaction t : transactions) {
             RequestDefinition requestDefinition = buildRequestDefinitionData(t, context);
-            Object routeResponse = routeExecutionService.execute(t.routeCode(), requestDefinition);
+            Object routeResponse = routeExecutionService.execute(t.routeCode(), requestDefinition, t.retry());
             mapResponse(t.responseSchema().body(), routeResponse, context);
         }
     }

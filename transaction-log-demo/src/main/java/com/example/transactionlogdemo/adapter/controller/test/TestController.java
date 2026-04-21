@@ -23,11 +23,12 @@ public class TestController implements TestApi {
 
     @Override
     public ResponseEntity<TestResponse> test(TestRequest request) {
+
         log.info("Test receive: {}", request);
         Test test = requestMapper.toDomain(request);
         TestResponse response = responseMapper.toDto(test);
         log.info("Test response: {}", response);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.internalServerError().build();
     }
 }
