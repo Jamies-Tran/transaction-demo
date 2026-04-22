@@ -29,6 +29,6 @@ public class TestController implements TestApi {
         TestResponse response = responseMapper.toDto(test);
         log.info("Test response: {}", response);
 
-        return ResponseEntity.internalServerError().build();
+        return ResponseEntity.ok(response);
     }
 }
