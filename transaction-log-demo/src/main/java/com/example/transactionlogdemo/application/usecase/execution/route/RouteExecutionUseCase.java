@@ -4,11 +4,14 @@ import com.example.transactionlogdemo.domain.entity.log.TransactionLog;
 import com.example.transactionlogdemo.domain.entity.route.Route;
 import com.example.transactionlogdemo.domain.entity.transaction.retry.Retry;
 import com.example.transactionlogdemo.domain.enums.EnumMethod;
+import com.example.transactionlogdemo.domain.enums.EnumTransactionLogStatus;
 import com.example.transactionlogdemo.domain.service.execution.route.RouteExecutionService;
 import com.example.transactionlogdemo.domain.service.log.TransactionLogService;
 import com.example.transactionlogdemo.domain.service.route.RouteService;
+import com.example.transactionlogdemo.infrastructure.bootstrap.utils.jackson.ObjectMapperUtils;
 import com.example.transactionlogdemo.infrastructure.external.adapter.RouteExternalAdapter;
 import com.example.transactionlogdemo.infrastructure.external.dto.RequestDefinition;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -31,6 +34,8 @@ public class RouteExecutionUseCase implements RouteExecutionService {
     TransactionLogService transactionLogService;
 
     RouteExternalAdapter routeExternalAdapter;
+
+    HttpServletRequest requestServlet;
 
     @Override
     public Object execute(String routeCode, RequestDefinition requestDefinition, Retry retry) {
@@ -63,8 +68,7 @@ public class RouteExecutionUseCase implements RouteExecutionService {
     private Object executeRequestWithRetry(RequestDefinition def, Retry retry) {
         try {
             ResponseEntity<Object> response = routeExternalAdapter.execute(def);
-            TransactionLog transactionLog = TransactionLog.builder()
-                    .build();
+            saveLog(def, response);
             return response.getBody();
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             try {
@@ -77,12 +81,69 @@ public class RouteExecutionUseCase implements RouteExecutionService {
                     log.info("Retry count: {}", retry.maxAttempts());
                     Thread.sleep(retry.backoff());
                     int remainRetry = retry.maxAttempts() - 1;
+                    saveLog(def, String.valueOf(e.getStatusCode().value()), remainRetry, e.getMessage());
                     return executeRequestWithRetry(def, retry.withMaxAttempts(remainRetry));
                 }
+                saveLog(def, String.valueOf(e.getStatusCode().value()), 0, e.getMessage());
                 throw new RuntimeException(e);
             } catch (InterruptedException ie) {
                 throw e;
             }
         }
+    }
+
+    private void saveLog(
+            RequestDefinition request,
+            ResponseEntity<Object> response
+    ) {
+        TransactionLog transactionLog = buildTransactionLog(request, response);
+        transactionLogService.create(transactionLog);
+    }
+
+    private void saveLog(
+            RequestDefinition request,
+            String httpStatusCode,
+            Integer retryCount,
+            String errMessage
+    ) {
+        TransactionLog transactionLog = buildTransactionLog(request, httpStatusCode, retryCount, errMessage);
+        transactionLogService.create(transactionLog);
+    }
+
+    private TransactionLog buildTransactionLog(
+            RequestDefinition request,
+            ResponseEntity<Object> response
+    ) {
+        long requestAtMillis = (long) requestServlet.getAttribute("X-Request-At");
+        long responseAtMillis = System.currentTimeMillis() - requestAtMillis;
+        return TransactionLog.builder()
+                .transactionId(request.transactionId())
+                .requestBody(ObjectMapperUtils.convertToString(response.getBody()))
+                .requestParam(ObjectMapperUtils.convertToString(request.params()))
+                .httpStatus(String.valueOf(response.getStatusCode().value()))
+                .requestAtMillis(requestAtMillis)
+                .responseAtMillis(responseAtMillis)
+                .status(EnumTransactionLogStatus.SUCCESS.name())
+                .build();
+    }
+
+    private TransactionLog buildTransactionLog(
+            RequestDefinition request,
+            String httpStatusCode,
+            Integer retryCount,
+            String errMessage
+    ) {
+        long requestAtMillis = (long) requestServlet.getAttribute("X-Request-At");
+        long responseAtMillis = System.currentTimeMillis() - requestAtMillis;
+        return TransactionLog.builder()
+                .transactionId(request.transactionId())
+                .requestParam(ObjectMapperUtils.convertToString(request.params()))
+                .httpStatus(httpStatusCode)
+                .requestAtMillis(requestAtMillis)
+                .responseAtMillis(responseAtMillis)
+                .retryCount(retryCount)
+                .errMessage(errMessage)
+                .status(EnumTransactionLogStatus.ERROR.name())
+                .build();
     }
 }

@@ -19,13 +19,13 @@ public class TransactionLogCollection {
     String id;
     String transactionId;
 
-    Map<String, Object> requestBody;
-    Map<String, Object> requestParam;
+    String requestBody;
+    String requestParam;
 
     String requestBy;
     String requestByName;
-    LocalDateTime requestAt;
-    LocalDateTime responseAt;
+    Long requestAtMillis;
+    Long responseAtMillis;
 
     Integer retryCount;
     String errMessage;

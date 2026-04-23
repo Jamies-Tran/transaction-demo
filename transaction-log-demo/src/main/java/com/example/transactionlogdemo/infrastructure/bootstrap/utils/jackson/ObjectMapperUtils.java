@@ -31,24 +31,11 @@ public class ObjectMapperUtils {
         }
     }
 
-    public static Map<String, String> buildMapping(Map<String, Object> input) {
-        Map<String, String> result = new HashMap<>();
-        traverse("", input, result);
-
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static void traverse(String path, Map<String, Object> current, Map<String, String> result) {
-        for (Map.Entry<String, Object> c : current.entrySet()) {
-            String key = c.getKey();
-            Object value = c.getValue();
-            String currentPath = StringUtils.hasText(path) ? ".%s".formatted(c.getKey()) : "?.%s".formatted(c.getKey());
-            if (value instanceof Map<?, ?>) {
-                traverse(currentPath, (Map<String, Object>) value, result);
-            }
-
-            result.put(key, currentPath);
+    public static String convertToString(Object object) {
+        try {
+            return objectMapper.writeValueAsString(object);
+        } catch (Exception e) {
+            throw new RuntimeException();
         }
     }
 }

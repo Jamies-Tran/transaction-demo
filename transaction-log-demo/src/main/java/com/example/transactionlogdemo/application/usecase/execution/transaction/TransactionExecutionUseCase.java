@@ -57,6 +57,7 @@ public class TransactionExecutionUseCase implements TransactionExecutionService 
         Authentication authentication = transaction.authentication();
 
         return RequestDefinition.builder()
+                .transactionId(transaction.id())
                 .params(mapParams)
                 .body(mapBody)
                 .authentication(authentication)

@@ -13,6 +13,7 @@ public record RequestDefinition(
         EnumMethod method,
         @With
         String uri,
+        String transactionId,
         Map<String, String> header,
         Map<String, Object> body,
         Map<String, Object> params,
