@@ -1,9 +1,11 @@
 package com.example.transactionlogdemo.application.usecase.execution.route;
 
+import com.example.transactionlogdemo.domain.entity.log.TransactionLog;
 import com.example.transactionlogdemo.domain.entity.route.Route;
 import com.example.transactionlogdemo.domain.entity.transaction.retry.Retry;
 import com.example.transactionlogdemo.domain.enums.EnumMethod;
 import com.example.transactionlogdemo.domain.service.execution.route.RouteExecutionService;
+import com.example.transactionlogdemo.domain.service.log.TransactionLogService;
 import com.example.transactionlogdemo.domain.service.route.RouteService;
 import com.example.transactionlogdemo.infrastructure.external.adapter.RouteExternalAdapter;
 import com.example.transactionlogdemo.infrastructure.external.dto.RequestDefinition;
@@ -25,6 +27,8 @@ import java.util.Objects;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RouteExecutionUseCase implements RouteExecutionService {
     RouteService routeService;
+
+    TransactionLogService transactionLogService;
 
     RouteExternalAdapter routeExternalAdapter;
 
@@ -58,8 +62,10 @@ public class RouteExecutionUseCase implements RouteExecutionService {
 
     private Object executeRequestWithRetry(RequestDefinition def, Retry retry) {
         try {
-            return routeExternalAdapter.execute(def)
-                    .getBody();
+            ResponseEntity<Object> response = routeExternalAdapter.execute(def);
+            TransactionLog transactionLog = TransactionLog.builder()
+                    .build();
+            return response.getBody();
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             try {
                 boolean allowRetry = switch (e.getStatusCode()) {

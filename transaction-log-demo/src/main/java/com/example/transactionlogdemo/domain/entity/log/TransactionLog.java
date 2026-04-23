@@ -1,8 +1,11 @@
 package com.example.transactionlogdemo.domain.entity.log;
 
+import lombok.Builder;
+
 import java.time.LocalDateTime;
 import java.util.Map;
 
+@Builder
 public record TransactionLog(
         String id,
         String transactionId,
