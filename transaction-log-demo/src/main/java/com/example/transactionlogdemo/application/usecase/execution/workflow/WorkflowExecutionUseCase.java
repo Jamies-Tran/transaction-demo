@@ -1,10 +1,11 @@
 package com.example.transactionlogdemo.application.usecase.execution.workflow;
 
 import com.example.transactionlogdemo.domain.entity.context.execution.ExecutionContext;
+import com.example.transactionlogdemo.domain.entity.execution.result.workflow.WorkflowExecutionResult;
 import com.example.transactionlogdemo.domain.entity.workflow.Workflow;
+import com.example.transactionlogdemo.domain.service.execution.execution.result.workflow.WorkflowExecutionResultService;
 import com.example.transactionlogdemo.domain.service.execution.transaction.TransactionExecutionService;
 import com.example.transactionlogdemo.domain.service.execution.workflow.WorkflowExecutionService;
-import com.example.transactionlogdemo.domain.service.transaction.TransactionService;
 import com.example.transactionlogdemo.domain.service.workflow.WorkflowService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -24,15 +25,25 @@ public class WorkflowExecutionUseCase implements WorkflowExecutionService {
 
     TransactionExecutionService transactionExecutionService;
 
+    WorkflowExecutionResultService workflowExecutionResultService;
+
     @Override
-    public void execute(String workflowId, Map<String, Object> input) {
+    public WorkflowExecutionResult execute(String workflowCode, Map<String, Object> input) {
         ExecutionContext context = new ExecutionContext();
         context.putAll(input);
-        Workflow workflow = workflowService.getById(workflowId)
+        Workflow workflow = workflowService.getByCode(workflowCode)
                 .orElseThrow(RuntimeException::new);
 
         List<String> transactionCodes = workflow.transactionCodes();
-        transactionExecutionService.execute(transactionCodes, context);
+        List<WorkflowExecutionResult.ExecutionResult> executionResults =
+                transactionExecutionService.execute(transactionCodes, context);
+        WorkflowExecutionResult workflowExecutionResult = workflowExecutionResultService
+                .create(WorkflowExecutionResult.builder()
+                        .workflowCode(workflowCode)
+                        .executionResults(executionResults)
+                        .build());
         log.info("Current context: {}", context.getData());
+
+        return workflowExecutionResult;
     }
 }

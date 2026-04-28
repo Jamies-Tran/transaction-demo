@@ -22,28 +22,28 @@ public class WorkflowUseCase implements WorkflowService {
     }
 
     @Override
-    public Optional<Workflow> getById(String workflowId) {
-        return repository.findById(workflowId);
+    public Optional<Workflow> getByCode(String workflowCode) {
+        return repository.findByCode(workflowCode);
     }
 
     @Override
-    public Workflow inactivate(String workflowId) {
-        Workflow workflow = repository.findById(workflowId)
+    public Workflow inactivateByCode(String code) {
+        Workflow workflow = repository.findByCode(code)
                 .orElseThrow(RuntimeException::new);
 
         return repository.upsert(workflow.inactivate());
     }
 
     @Override
-    public Workflow activate(String workflowId) {
-        Workflow workflow = repository.findById(workflowId)
+    public Workflow activateByCode(String code) {
+        Workflow workflow = repository.findByCode(code)
                 .orElseThrow(RuntimeException::new);
 
         return repository.upsert(workflow.activate());
     }
 
     @Override
-    public void remove(String workflowId) {
-        repository.delete(workflowId);
+    public void removeByCode(String code) {
+        repository.deleteByCode(code);
     }
 }

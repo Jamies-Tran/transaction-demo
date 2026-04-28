@@ -16,15 +16,15 @@ public interface WorkflowApi {
     @PostMapping
     ResponseEntity<WorkflowResponse> create(@RequestBody WorkflowRequest request);
 
-    @GetMapping("/{id}")
-    ResponseEntity<WorkflowResponse> findById(@PathVariable String id);
+    @GetMapping("/{code}")
+    ResponseEntity<WorkflowResponse> findByCode(@PathVariable String code);
 
-    @PatchMapping("/{id}/inactivate")
-    ResponseEntity<?> inactivate(@PathVariable String id);
+    @PatchMapping("/{code}/inactivate")
+    ResponseEntity<?> inactivateByCode(@PathVariable String code);
 
-    @PatchMapping("/{id}/activate")
-    ResponseEntity<?> activate(@PathVariable String id);
+    @PatchMapping("/{code}/activate")
+    ResponseEntity<?> activateByCode(@PathVariable String code);
 
-    @DeleteMapping("/{id}")
-    ResponseEntity<?> remove(@PathVariable String id);
+    @DeleteMapping("/{code}")
+    ResponseEntity<?> removeByCode(@PathVariable String code);
 }

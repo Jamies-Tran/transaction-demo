@@ -14,11 +14,11 @@ import java.util.Objects;
 @Builder
 public record MongoCriteria(
         Field field,
-        EnumCompareOperator compareOperator,
+        EnumOperator operator,
         List<MongoCriteria> and,
         List<MongoCriteria> or
 ) {
-    // MongoCriteria.builder().field().compareOperator().and(...).or(...)
+    // MongoCriteria.builder().field().operator().and(...).or(...)
 
     @Builder
     public record Field<T>(
@@ -27,7 +27,7 @@ public record MongoCriteria(
             List<T> values
     ) {}
 
-    public enum EnumCompareOperator {
+    public enum EnumOperator {
         EQUAL,
         NOT_EQUAL,
         LESS,
@@ -41,9 +41,9 @@ public record MongoCriteria(
 
     public Query buildQuery() {
         Criteria criteria = new Criteria();
-        if (Objects.nonNull(field) && Objects.nonNull(compareOperator)) {
+        if (Objects.nonNull(field) && Objects.nonNull(operator)) {
             criteria = Criteria.where(field.key);
-            switch (compareOperator) {
+            switch (operator) {
                 case EQUAL -> {
                     if (Objects.isNull(field.value)) {
                         log.error("[MongoCriteria.buildQuery()] message: value không được null hoặc bỏ trống");
@@ -114,7 +114,7 @@ public record MongoCriteria(
             for (MongoCriteria mongoCriteria : and) {
                 Field f = mongoCriteria.field;
                 Criteria c = Criteria.where(f.key);
-                switch (mongoCriteria.compareOperator) {
+                switch (mongoCriteria.operator) {
                     case EQUAL -> {
                         if (Objects.isNull(f.value)) {
                             log.error("[MongoCriteria.buildQuery()] message: value không được null hoặc bỏ trống");
@@ -185,7 +185,7 @@ public record MongoCriteria(
             for (MongoCriteria mongoCriteria : or) {
                 Field f = mongoCriteria.field;
                 Criteria c = Criteria.where(f.key);
-                switch (mongoCriteria.compareOperator) {
+                switch (mongoCriteria.operator) {
                     case EQUAL -> {
                         if (Objects.isNull(f.value)) {
                             log.error("[MongoCriteria.buildQuery()] message: value không được null hoặc bỏ trống");
@@ -258,9 +258,9 @@ public record MongoCriteria(
 
     public Query buildQuery(PageRequest pageRequest) {
         Criteria criteria = new Criteria();
-        if (Objects.nonNull(field) && Objects.nonNull(compareOperator)) {
+        if (Objects.nonNull(field) && Objects.nonNull(operator)) {
             criteria = Criteria.where(field.key);
-            switch (compareOperator) {
+            switch (operator) {
                 case EQUAL -> {
                     if (Objects.isNull(field.value)) {
                         log.error("[MongoCriteria.buildQuery()] message: value không được null hoặc bỏ trống");
@@ -331,7 +331,7 @@ public record MongoCriteria(
             for (MongoCriteria mongoCriteria : and) {
                 Field f = mongoCriteria.field;
                 Criteria c = Criteria.where(f.key);
-                switch (mongoCriteria.compareOperator) {
+                switch (mongoCriteria.operator) {
                     case EQUAL -> {
                         if (Objects.isNull(f.value)) {
                             log.error("[MongoCriteria.buildQuery()] message: value không được null hoặc bỏ trống");
@@ -402,7 +402,7 @@ public record MongoCriteria(
             for (MongoCriteria mongoCriteria : or) {
                 Field f = mongoCriteria.field;
                 Criteria c = Criteria.where(f.key);
-                switch (mongoCriteria.compareOperator) {
+                switch (mongoCriteria.operator) {
                     case EQUAL -> {
                         if (Objects.isNull(f.value)) {
                             log.error("[MongoCriteria.buildQuery()] message: value không được null hoặc bỏ trống");

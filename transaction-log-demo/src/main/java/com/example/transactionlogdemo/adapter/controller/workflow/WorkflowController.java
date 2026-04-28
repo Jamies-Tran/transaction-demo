@@ -32,8 +32,8 @@ public class WorkflowController implements WorkflowApi {
     }
 
     @Override
-    public ResponseEntity<WorkflowResponse> findById(String id) {
-        WorkflowResponse response = workflowService.getById(id)
+    public ResponseEntity<WorkflowResponse> findByCode(String code) {
+        WorkflowResponse response = workflowService.getByCode(code)
                 .map(responseMapper::toDto)
                 .orElseThrow(RuntimeException::new);
 
@@ -41,22 +41,22 @@ public class WorkflowController implements WorkflowApi {
     }
 
     @Override
-    public ResponseEntity<?> inactivate(String id) {
-        Workflow workflow = workflowService.inactivate(id);
+    public ResponseEntity<?> inactivateByCode(String code) {
+        Workflow workflow = workflowService.inactivateByCode(code);
 
         return ResponseEntity.ok(responseMapper.toDto(workflow));
     }
 
     @Override
-    public ResponseEntity<?> activate(String id) {
-        Workflow workflow = workflowService.activate(id);
+    public ResponseEntity<?> activateByCode(String code) {
+        Workflow workflow = workflowService.activateByCode(code);
 
         return ResponseEntity.ok(responseMapper.toDto(workflow));
     }
 
     @Override
-    public ResponseEntity<?> remove(String id) {
-        workflowService.remove(id);
+    public ResponseEntity<?> removeByCode(String code) {
+        workflowService.removeByCode(code);
 
         return ResponseEntity.noContent().build();
     }

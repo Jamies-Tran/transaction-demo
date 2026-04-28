@@ -1,18 +1,24 @@
 package com.example.transactionlogdemo.application.usecase.execution.transaction;
 
 import com.example.transactionlogdemo.domain.entity.context.execution.ExecutionContext;
+import com.example.transactionlogdemo.domain.entity.execution.result.route.RouteExecutionResult;
+import com.example.transactionlogdemo.domain.entity.execution.result.workflow.WorkflowExecutionResult;
 import com.example.transactionlogdemo.domain.entity.transaction.Transaction;
 import com.example.transactionlogdemo.domain.entity.transaction.authentication.Authentication;
+import com.example.transactionlogdemo.domain.enums.EnumExecutionErrorSource;
+import com.example.transactionlogdemo.domain.enums.EnumTransactionResultStatus;
 import com.example.transactionlogdemo.domain.service.execution.route.RouteExecutionService;
 import com.example.transactionlogdemo.domain.service.execution.transaction.TransactionExecutionService;
 import com.example.transactionlogdemo.domain.service.transaction.TransactionService;
 import com.example.transactionlogdemo.infrastructure.bootstrap.utils.jackson.JsonPathUtils;
+import com.example.transactionlogdemo.infrastructure.bootstrap.utils.jackson.ObjectMapperUtils;
 import com.example.transactionlogdemo.infrastructure.external.dto.RequestDefinition;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,25 +31,49 @@ public class TransactionExecutionUseCase implements TransactionExecutionService 
     RouteExecutionService routeExecutionService;
 
     @Override
-    public void execute(List<String> transactionCodes, ExecutionContext context) {
+    public List<WorkflowExecutionResult.ExecutionResult> execute(
+            List<String> transactionCodes,
+            ExecutionContext context
+    ) {
         List<Transaction> transactions = transactionService.getAllByCodeIn(transactionCodes);
+        List<WorkflowExecutionResult.ExecutionResult> executionResults = new ArrayList<>();
         for (Transaction t : transactions) {
             RequestDefinition requestDefinition = buildRequestDefinitionData(t, context);
-            Object routeResponse = routeExecutionService.execute(t.routeCode(), requestDefinition, t.retry());
-            mapResponse(t.responseSchema().body(), routeResponse, context);
+            RouteExecutionResult routeResponse = routeExecutionService.execute(t.routeCode(), requestDefinition,
+                    t.retry());
+            executionResults.addAll(routeResponse.results());
+            mapResponse(t.responseSchema().body(), routeResponse.responseData(), context, executionResults);
         }
+
+        return executionResults;
     }
 
-    private void mapResponse(Map<String, Object> mapping, Object source, ExecutionContext context) {
+    private void mapResponse(
+            Map<String, Object> mapping,
+            Object source,
+            ExecutionContext context,
+            List<WorkflowExecutionResult.ExecutionResult> results
+    ) {
         for (Map.Entry<String, Object> m : mapping.entrySet()) {
             String key = m.getKey();
             Object value = m.getValue();
             if (value instanceof String jsonPath) {
-                Object valueMapped = JsonPathUtils.read(source, jsonPath);
-                context.put(key, valueMapped);
+                try {
+                    Object valueMapped = JsonPathUtils.read(source, jsonPath);
+                    context.put(key, valueMapped);
+                } catch (Exception e) {
+                    results.add(WorkflowExecutionResult.ExecutionResult.builder()
+                            .errMessage(e.getMessage())
+                            .dataResult(ObjectMapperUtils.convertToString(source))
+                            .status(EnumTransactionResultStatus.ERROR.name())
+                            .errSourceCode(EnumExecutionErrorSource.SYSTEM_ERR.getCode())
+                            .errSourceName(EnumExecutionErrorSource.SYSTEM_ERR.getName())
+                            .build());
+                    return;
+                }
             }
             if (value instanceof Map map) {
-                mapResponse(map, source, context);
+                mapResponse(map, source, context, results);
             }
         }
     }

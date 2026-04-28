@@ -7,11 +7,11 @@ import java.util.Optional;
 public interface WorkflowService {
     Workflow create(Workflow workflow);
 
-    Optional<Workflow> getById(String workflowId);
+    Optional<Workflow> getByCode(String workflowCode);
 
-    Workflow inactivate(String workflowId);
+    Workflow inactivateByCode(String code);
 
-    Workflow activate(String workflowId);
+    Workflow activateByCode(String code);
 
-    void remove(String workflowId);
+    void removeByCode(String code);
 }

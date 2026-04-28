@@ -3,6 +3,7 @@ package com.example.transactionlogdemo.infrastructure.persistence.adapter.mongo.
 import com.example.transactionlogdemo.domain.entity.route.Route;
 import com.example.transactionlogdemo.domain.repository.route.RouteRepository;
 import com.example.transactionlogdemo.infrastructure.persistence.entity.route.RouteCollection;
+import com.example.transactionlogdemo.infrastructure.persistence.entity.transaction.TransactionCollection;
 import com.example.transactionlogdemo.infrastructure.persistence.mapper.route.RouteEntityMapper;
 import com.example.transactionlogdemo.infrastructure.persistence.repository.mongo.criteria.MongoCriteria;
 import lombok.AccessLevel;
@@ -26,11 +27,12 @@ public class RoutePersistenceAdapter implements RouteRepository {
     @Override
     public Route upsert(Route route) {
         Route upsertRoute = null;
-        if (Objects.nonNull(route.id()) || Objects.nonNull(route.code())) {
-            upsertRoute = update(route);
+        Optional<RouteCollection> exist = getExist(route.id());
+        if (exist.isPresent()) {
+            upsertRoute = update(exist.get(), route);
         }
 
-        if (Objects.isNull(upsertRoute)) {
+        if (exist.isEmpty()) {
             upsertRoute = save(route);
         }
 
@@ -44,11 +46,26 @@ public class RoutePersistenceAdapter implements RouteRepository {
                         .key("code")
                         .value(code)
                         .build())
-                .compareOperator(MongoCriteria.EnumCompareOperator.EQUAL)
+                .operator(MongoCriteria.EnumOperator.EQUAL)
                 .build();
 
         return Optional.ofNullable(mongoTemplate.findOne(criteria.buildQuery(), RouteCollection.class))
                 .map(entityMapper::toDomain);
+    }
+
+    private Optional<RouteCollection> getExist(String id) {
+        if (Objects.isNull(id)) {
+            return Optional.empty();
+        }
+        MongoCriteria mongoCriteria = MongoCriteria.builder()
+                .field(MongoCriteria.Field.builder()
+                        .key("id")
+                        .value(id)
+                        .build())
+                .operator(MongoCriteria.EnumOperator.EQUAL)
+                .build();
+
+        return Optional.ofNullable(mongoTemplate.findOne(mongoCriteria.buildQuery(), RouteCollection.class));
     }
 
     private Route save(Route route) {
@@ -58,48 +75,9 @@ public class RoutePersistenceAdapter implements RouteRepository {
         return entityMapper.toDomain(saveRoute);
     }
 
-    private Route update(Route route) {
-        MongoCriteria.MongoCriteriaBuilder criteriaBuilder = MongoCriteria.builder();
-        if (Objects.nonNull(route.id())) {
-            criteriaBuilder
-                    .field(MongoCriteria.Field.builder()
-                            .key("id")
-                            .value(route.id())
-                            .build())
-                    .compareOperator(MongoCriteria.EnumCompareOperator.EQUAL);
-        }
-        if (Objects.nonNull(route.code())) {
-            criteriaBuilder
-                    .field(MongoCriteria.Field.builder()
-                            .key("code")
-                            .value(route.code())
-                            .build())
-                    .compareOperator(MongoCriteria.EnumCompareOperator.EQUAL);
-        }
-        if (Objects.nonNull(route.code()) && Objects.nonNull(route.id())) {
-            criteriaBuilder
-                    .field(MongoCriteria.Field.builder()
-                            .key("code")
-                            .value(route.code())
-                            .build())
-                    .compareOperator(MongoCriteria.EnumCompareOperator.EQUAL)
-                    .and(List.of(MongoCriteria.builder()
-                                    .field(MongoCriteria.Field.builder()
-                                            .key("id")
-                                            .value(route.id())
-                                            .build())
-                                    .compareOperator(MongoCriteria.EnumCompareOperator.EQUAL)
-                            .build()));
-        }
-        MongoCriteria criteria = criteriaBuilder.build();
-        Optional<RouteCollection> exist = Optional
-                .ofNullable(mongoTemplate.findOne(criteria.buildQuery(), RouteCollection.class));
-        if (exist.isEmpty()) {
-            return null;
-        }
-        RouteCollection prepareSaveRoute = exist.get();
-        entityMapper.update(prepareSaveRoute, route);
-        RouteCollection saveRoute = mongoTemplate.save(prepareSaveRoute);
+    private Route update(RouteCollection routeCollection, Route route) {
+        entityMapper.update(routeCollection, route);
+        RouteCollection saveRoute = mongoTemplate.save(routeCollection);
 
         return entityMapper.toDomain(saveRoute);
     }

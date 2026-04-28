@@ -8,6 +8,7 @@ import java.util.Objects;
 
 public record Workflow(
         String id,
+        String code,
         String name,
         List<String> transactionCodes,
         @With Boolean active

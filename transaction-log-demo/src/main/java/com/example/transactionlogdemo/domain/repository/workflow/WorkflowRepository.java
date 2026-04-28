@@ -7,7 +7,7 @@ import java.util.Optional;
 public interface WorkflowRepository {
     Workflow upsert(Workflow workflow);
 
-    Optional<Workflow> findById(String id);
+    Optional<Workflow> findByCode(String code);
 
-    void delete(String id);
+    void deleteByCode(String code);
 }
