@@ -1,11 +1,9 @@
 package com.example.transactionlogdemo.domain.entity.transaction;
 
-import com.example.transactionlogdemo.domain.entity.transaction.authentication.Authentication;
-import com.example.transactionlogdemo.domain.entity.transaction.retry.Retry;
-import com.example.transactionlogdemo.domain.entity.transaction.schema.DataRequestSchema;
-import com.example.transactionlogdemo.domain.entity.transaction.schema.DataResponseSchema;
+import lombok.With;
 
 import java.util.List;
+import java.util.Map;
 
 public record Transaction(
         String id,
@@ -18,4 +16,24 @@ public record Transaction(
         Retry retry,
         List<String> dependsOn
 ) {
+    public record Authentication(
+            String type,
+            String token
+    ) {}
+
+    public record Retry(
+            @With
+            Integer maxAttempts,
+            Integer backoff
+    ) {}
+
+    public record DataRequestSchema(
+            Map<String, Object> params,
+            Map<String, Object> body
+    ) { }
+
+    public record DataResponseSchema(
+            Map<String, Object> body
+    ) {
+    }
 }

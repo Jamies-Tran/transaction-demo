@@ -1,11 +1,6 @@
 package com.example.transactionlogdemo.application.dto.response.transaction;
 
-import com.example.transactionlogdemo.application.dto.response.transaction.authentication.AuthenticationResponse;
-import com.example.transactionlogdemo.application.dto.response.transaction.retry.RetryResponse;
-import com.example.transactionlogdemo.application.dto.response.transaction.schema.DataRequestSchemaResponse;
-import com.example.transactionlogdemo.application.dto.response.transaction.schema.DataResponseSchemaResponse;
-
-import java.util.List;
+import java.util.Map;
 
 public record TransactionResponse(
         String id,
@@ -15,7 +10,24 @@ public record TransactionResponse(
         DataRequestSchemaResponse requestSchema,
         DataResponseSchemaResponse responseSchema,
         AuthenticationResponse authentication,
-        RetryResponse retry,
-        List<String> dependsOn
+        RetryResponse retry
 ) {
+    public record AuthenticationResponse(
+            String type,
+            String token
+    ) { }
+
+    public record RetryResponse(
+            Integer maxAttempts,
+            Integer backoff
+    ) { }
+
+    public record DataRequestSchemaResponse(
+            Map<String, Object> params,
+            Map<String, Object> body
+    ) { }
+
+    public record DataResponseSchemaResponse(
+            Map<String, Object> body
+    ) { }
 }

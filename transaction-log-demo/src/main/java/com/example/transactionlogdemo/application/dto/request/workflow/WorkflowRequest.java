@@ -6,6 +6,10 @@ public record WorkflowRequest(
         String id,
         String name,
         String code,
-        List<String> transactionCodes
+        List<WorkflowTransactionRequest> transactions
 ) {
+    public record WorkflowTransactionRequest(
+            Integer executionOrder,
+            String transactionCode
+    ) {}
 }

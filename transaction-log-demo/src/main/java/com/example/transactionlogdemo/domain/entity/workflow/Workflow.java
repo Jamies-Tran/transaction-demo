@@ -10,9 +10,14 @@ public record Workflow(
         String id,
         String code,
         String name,
-        List<String> transactionCodes,
+        List<WorkflowTransaction> transactions,
         @With Boolean active
 ) {
+    public record WorkflowTransaction(
+            Integer executionOrder,
+            String transactionCode
+    ) {}
+
     public Workflow {
         if (Objects.isNull(active)) {
             active = true;

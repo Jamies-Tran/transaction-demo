@@ -1,9 +1,5 @@
 package com.example.transactionlogdemo.application.dto.response.route;
 
-import com.example.transactionlogdemo.application.dto.response.route.path.PathResponse;
-import com.example.transactionlogdemo.application.dto.response.route.protocol.ProtocolResponse;
-import com.example.transactionlogdemo.application.dto.response.route.remote.RemoteResponse;
-
 public record RouteResponse(
         String id,
         String code,
@@ -12,4 +8,24 @@ public record RouteResponse(
         RemoteResponse remote,
         PathResponse path
 ) {
+    public record PathResponse(
+            String uri,
+            String inUri
+    ) { }
+
+    public record ProtocolResponse(
+            String connector,
+            String method
+    ) { }
+
+    public record RemoteResponse(
+            String remoteCode,
+            String serverId,
+            String serverName,
+            String host,
+            String rewrite,
+            String hostProxy,
+            Boolean isProxy,
+            Boolean isG
+    ) { }
 }

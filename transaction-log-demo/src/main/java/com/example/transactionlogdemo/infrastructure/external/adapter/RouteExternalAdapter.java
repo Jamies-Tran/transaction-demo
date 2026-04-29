@@ -1,9 +1,6 @@
 package com.example.transactionlogdemo.infrastructure.external.adapter;
 
-import com.example.transactionlogdemo.domain.entity.context.execution.ExecutionContext;
-import com.example.transactionlogdemo.domain.entity.route.Route;
-import com.example.transactionlogdemo.domain.entity.transaction.authentication.Authentication;
-import com.example.transactionlogdemo.domain.enums.EnumMethod;
+import com.example.transactionlogdemo.domain.entity.transaction.Transaction;
 import com.example.transactionlogdemo.infrastructure.bootstrap.utils.jackson.ObjectMapperUtils;
 import com.example.transactionlogdemo.infrastructure.external.dto.RequestDefinition;
 import lombok.AccessLevel;
@@ -11,15 +8,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
 
@@ -74,7 +68,7 @@ public class RouteExternalAdapter {
         return ObjectMapperUtils.convertToString(def.body());
     }
 
-    private void setAuthentication(Authentication authentication, HttpHeaders headers) {
+    private void setAuthentication(Transaction.Authentication authentication, HttpHeaders headers) {
         switch (authentication.type()) {
             case "BEARER" -> {
                 headers.add("Authorization", "Bearer %s".formatted(authentication.token()));

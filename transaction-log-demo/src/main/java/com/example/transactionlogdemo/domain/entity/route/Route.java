@@ -1,9 +1,5 @@
 package com.example.transactionlogdemo.domain.entity.route;
 
-import com.example.transactionlogdemo.domain.entity.route.path.Path;
-import com.example.transactionlogdemo.domain.entity.route.protocol.Protocol;
-import com.example.transactionlogdemo.domain.entity.route.remote.Remote;
-
 public record Route(
         String id,
         String code,
@@ -12,4 +8,24 @@ public record Route(
         Remote remote,
         Path path
 ) {
+    public record Path(
+            String uri,
+            String inUri
+    ) { }
+
+    public record Protocol(
+            String connector,
+            String method
+    ) { }
+
+    public record Remote(
+            String remoteCode,
+            String serverId,
+            String serverName,
+            String host,
+            String rewrite,
+            String hostProxy,
+            Boolean isProxy,
+            Boolean isG
+    ) { }
 }

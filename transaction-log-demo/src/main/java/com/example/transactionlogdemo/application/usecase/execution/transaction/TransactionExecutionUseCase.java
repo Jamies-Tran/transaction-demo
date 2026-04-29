@@ -4,7 +4,7 @@ import com.example.transactionlogdemo.domain.entity.context.execution.ExecutionC
 import com.example.transactionlogdemo.domain.entity.execution.result.route.RouteExecutionResult;
 import com.example.transactionlogdemo.domain.entity.execution.result.workflow.WorkflowExecutionResult;
 import com.example.transactionlogdemo.domain.entity.transaction.Transaction;
-import com.example.transactionlogdemo.domain.entity.transaction.authentication.Authentication;
+import com.example.transactionlogdemo.domain.entity.workflow.Workflow;
 import com.example.transactionlogdemo.domain.enums.EnumExecutionErrorSource;
 import com.example.transactionlogdemo.domain.enums.EnumTransactionResultStatus;
 import com.example.transactionlogdemo.domain.service.execution.route.RouteExecutionService;
@@ -18,13 +18,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@SuppressWarnings("unchecked")
 public class TransactionExecutionUseCase implements TransactionExecutionService {
     TransactionService transactionService;
 
@@ -32,15 +33,18 @@ public class TransactionExecutionUseCase implements TransactionExecutionService 
 
     @Override
     public List<WorkflowExecutionResult.ExecutionResult> execute(
-            List<String> transactionCodes,
+            List<Workflow.WorkflowTransaction> transactions,
             ExecutionContext context
     ) {
-        List<Transaction> transactions = transactionService.getAllByCodeIn(transactionCodes);
+        LinkedList<Transaction> transactionByOrder = transactionByOrder(transactions);
         List<WorkflowExecutionResult.ExecutionResult> executionResults = new ArrayList<>();
-        for (Transaction t : transactions) {
+        for (Transaction t : transactionByOrder) {
             RequestDefinition requestDefinition = buildRequestDefinitionData(t, context);
             RouteExecutionResult routeResponse = routeExecutionService.execute(t.routeCode(), requestDefinition,
                     t.retry());
+            if (!routeResponse.succeed()) {
+                break;
+            }
             executionResults.addAll(routeResponse.results());
             mapResponse(t.responseSchema().body(), routeResponse.responseData(), context, executionResults);
         }
@@ -72,8 +76,8 @@ public class TransactionExecutionUseCase implements TransactionExecutionService 
                     return;
                 }
             }
-            if (value instanceof Map map) {
-                mapResponse(map, source, context, results);
+            if (value instanceof Map<?, ?> map) {
+                mapResponse((Map<String, Object>) map, source, context, results);
             }
         }
     }
@@ -84,7 +88,7 @@ public class TransactionExecutionUseCase implements TransactionExecutionService 
     ) {
         Map<String, Object> mapParams = (Map<String, Object>) JsonPathUtils.mapJson(transaction.requestSchema().params(), context.getData());
         Map<String, Object> mapBody = (Map<String, Object>) JsonPathUtils.mapJson(transaction.requestSchema().body(), context.getData());
-        Authentication authentication = transaction.authentication();
+        Transaction.Authentication authentication = transaction.authentication();
 
         return RequestDefinition.builder()
                 .transactionId(transaction.id())
@@ -93,5 +97,19 @@ public class TransactionExecutionUseCase implements TransactionExecutionService 
                 .authentication(authentication)
                 .build();
 
+    }
+
+    private LinkedList<Transaction> transactionByOrder(List<Workflow.WorkflowTransaction> transactions) {
+        List<String> transactionCodes = transactions.stream()
+                .map(Workflow.WorkflowTransaction::transactionCode)
+                .toList();
+        Map<String, Transaction> transactionMap = transactionService.getAllByCodeIn(transactionCodes)
+                .stream()
+                .collect(Collectors.toMap(Transaction::code, Function.identity()));
+
+        return transactions.stream()
+                .sorted(Comparator.comparing(Workflow.WorkflowTransaction::executionOrder))
+                .map(t -> transactionMap.get(t.transactionCode()))
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 }

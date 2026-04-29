@@ -2,10 +2,7 @@ package com.example.transactionlogdemo.domain.entity.test;
 
 public record Test(
         String name,
-        Info info
+        String phone,
+        String email
 ) {
-    public record Info(
-            String phone,
-            String email
-    ) {}
 }

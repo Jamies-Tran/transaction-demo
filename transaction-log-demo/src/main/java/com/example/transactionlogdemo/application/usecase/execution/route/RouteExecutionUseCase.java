@@ -3,10 +3,11 @@ package com.example.transactionlogdemo.application.usecase.execution.route;
 import com.example.transactionlogdemo.domain.entity.execution.result.route.RouteExecutionResult;
 import com.example.transactionlogdemo.domain.entity.execution.result.workflow.WorkflowExecutionResult;
 import com.example.transactionlogdemo.domain.entity.route.Route;
-import com.example.transactionlogdemo.domain.entity.transaction.retry.Retry;
+import com.example.transactionlogdemo.domain.entity.transaction.Transaction;
 import com.example.transactionlogdemo.domain.enums.EnumExecutionErrorSource;
 import com.example.transactionlogdemo.domain.enums.EnumMethod;
 import com.example.transactionlogdemo.domain.enums.EnumTransactionResultStatus;
+import com.example.transactionlogdemo.domain.exception.ExecutionException;
 import com.example.transactionlogdemo.domain.service.execution.route.RouteExecutionService;
 import com.example.transactionlogdemo.domain.service.route.RouteService;
 import com.example.transactionlogdemo.infrastructure.bootstrap.utils.jackson.ObjectMapperUtils;
@@ -40,13 +41,33 @@ public class RouteExecutionUseCase implements RouteExecutionService {
 
     // domain chứa object và list log (fail + retry + success)
     @Override
-    public RouteExecutionResult execute(String routeCode, RequestDefinition requestDefinition, Retry retry) {
+    public RouteExecutionResult execute(
+            String routeCode,
+            RequestDefinition requestDefinition,
+            Transaction.Retry retry
+    ) {
         List<WorkflowExecutionResult.ExecutionResult> results = new ArrayList<>();
-        Route route = routeService.getByCode(routeCode)
-                .orElseThrow(RuntimeException::new);
-        RequestDefinition completeRequestDefinition = buildCompleteRequestDefinition(route, requestDefinition);
+        try {
+            Route route = routeService.getByCode(routeCode)
+                    .orElseThrow(RuntimeException::new);
+            RequestDefinition completeRequestDefinition = buildCompleteRequestDefinition(route, requestDefinition);
 
-        return executeRequestWithRetry(completeRequestDefinition, retry, results);
+            return executeRequestWithRetry(completeRequestDefinition, retry, results);
+        } catch (ExecutionException e) {
+            results.add(WorkflowExecutionResult.ExecutionResult.builder()
+                    .transactionId(requestDefinition.transactionId())
+                    .dataRequest(WorkflowExecutionResult.ExecutionResult.DataRequest.builder()
+                            .params(ObjectMapperUtils.convertToString(requestDefinition.params()))
+                            .body(ObjectMapperUtils.convertToString(requestDefinition.body()))
+                            .build())
+                    .status(EnumTransactionResultStatus.ERROR.name())
+                    .errSourceCode(EnumExecutionErrorSource.TRANSACTION_ERR.getCode())
+                    .errSourceName(EnumExecutionErrorSource.TRANSACTION_ERR.getName())
+                    .build());
+            return RouteExecutionResult.builder()
+                    .results(results)
+                    .build();
+        }
     }
 
     private RequestDefinition buildCompleteRequestDefinition(Route route, RequestDefinition source) {
@@ -70,7 +91,7 @@ public class RouteExecutionUseCase implements RouteExecutionService {
 
     private RouteExecutionResult executeRequestWithRetry(
             RequestDefinition def,
-            Retry retry,
+            Transaction.Retry retry,
             List<WorkflowExecutionResult.ExecutionResult> results
     ) {
         try {
@@ -97,7 +118,7 @@ public class RouteExecutionUseCase implements RouteExecutionService {
                 }
                 results.add(buildTransactionExecutionResult(def, String.valueOf(e.getStatusCode().value()),
                         null, e.getMessage()));
-                throw new RuntimeException(e);
+                throw new ExecutionException(e.getMessage());
             } catch (InterruptedException ie) {
                 throw e;
             }

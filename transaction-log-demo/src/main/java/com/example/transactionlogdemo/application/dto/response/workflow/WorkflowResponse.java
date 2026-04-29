@@ -6,7 +6,11 @@ public record WorkflowResponse(
         String id,
         String code,
         String name,
-        List<String> transactionCodes,
+        List<WorkflowTransactionResponse> transactions,
         Boolean active
 ) {
+    public record WorkflowTransactionResponse(
+            Integer executionOrder,
+            String transactionCode
+    ) {}
 }

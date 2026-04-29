@@ -34,9 +34,8 @@ public class WorkflowExecutionUseCase implements WorkflowExecutionService {
         Workflow workflow = workflowService.getByCode(workflowCode)
                 .orElseThrow(RuntimeException::new);
 
-        List<String> transactionCodes = workflow.transactionCodes();
         List<WorkflowExecutionResult.ExecutionResult> executionResults =
-                transactionExecutionService.execute(transactionCodes, context);
+                transactionExecutionService.execute(workflow.transactions(), context);
         WorkflowExecutionResult workflowExecutionResult = workflowExecutionResultService
                 .create(WorkflowExecutionResult.builder()
                         .workflowCode(workflowCode)
