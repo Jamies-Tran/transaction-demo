@@ -37,7 +37,8 @@ public record WorkflowExecutionResult(
         @Builder
         public record DataRequest(
                 String params,
-                String body
+                String body,
+                List<Object> pathVariable
         ) {}
     }
 }

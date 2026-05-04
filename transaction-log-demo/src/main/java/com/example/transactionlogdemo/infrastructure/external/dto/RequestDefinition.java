@@ -5,6 +5,7 @@ import com.example.transactionlogdemo.domain.enums.EnumMethod;
 import lombok.Builder;
 import lombok.With;
 
+import java.util.List;
 import java.util.Map;
 
 @Builder
@@ -15,6 +16,7 @@ public record RequestDefinition(
         String uri,
         String transactionId,
         String transactionCode,
+        List<Object> pathVariable,
         Map<String, String> header,
         Map<String, Object> body,
         Map<String, Object> params,

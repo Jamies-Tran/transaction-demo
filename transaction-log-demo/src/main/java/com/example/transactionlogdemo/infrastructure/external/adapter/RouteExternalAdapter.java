@@ -11,9 +11,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -44,6 +46,10 @@ public class RouteExternalAdapter {
                 uriComponentsBuilder.queryParam(entry.getKey(), entry.getValue());
             }
         }
+        if (!CollectionUtils.isEmpty(def.pathVariable())) {
+            List<String> pathStr = def.pathVariable().stream().map(Object::toString).toList();
+            uriComponentsBuilder.pathSegment(pathStr.toArray(new String[0]));
+        }
         return uriComponentsBuilder.toUriString();
     }
 
@@ -54,8 +60,8 @@ public class RouteExternalAdapter {
             for (Map.Entry<String, String> entry : def.header().entrySet()) {
                 headers.add(entry.getKey(), entry.getValue());
             }
-            setAuthentication(def.authentication(), headers);
         }
+        setAuthentication(def.authentication(), headers);
 
         return headers;
     }

@@ -1,6 +1,6 @@
 package com.example.transactionlogdemo.infrastructure.persistence.entity.execution.result.transaction;
 
-import com.example.transactionlogdemo.infrastructure.persistence.entity.execution.result.transaction.data.DataRequest;
+import com.example.transactionlogdemo.infrastructure.persistence.entity.execution.result.transaction.data.DataRequestCollection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class ExecutionResultCollection {
     String transactionId;
     String transactionCode;
-    DataRequest dataRequest;
+    DataRequestCollection dataRequestCollection;
     String dataResult;
     Integer retryCount;
     Long requestMillis;

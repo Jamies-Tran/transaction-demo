@@ -30,7 +30,8 @@ public record WorkflowExecutionResultResponse(
     ) {
         public record DataRequestResponse (
                 String params,
-                String body
+                String body,
+                List<Object> pathVariable
         ) {}
     }
 }

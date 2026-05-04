@@ -17,6 +17,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -89,6 +90,9 @@ public class TransactionExecutionUseCase implements TransactionExecutionService 
     ) {
         Map<String, Object> mapParams = (Map<String, Object>) JsonPathUtils.mapJson(transaction.requestSchema().params(), context.getData());
         Map<String, Object> mapBody = (Map<String, Object>) JsonPathUtils.mapJson(transaction.requestSchema().body(), context.getData());
+        List<Object> pathVariable = transaction.requestSchema().pathVariable().stream()
+                .map(path -> JsonPathUtils.mapJson(path, context.getData()))
+                .toList();
         Transaction.Authentication authentication = transaction.authentication();
 
         return RequestDefinition.builder()
@@ -96,6 +100,7 @@ public class TransactionExecutionUseCase implements TransactionExecutionService 
                 .transactionCode(transaction.code())
                 .params(mapParams)
                 .body(mapBody)
+                .pathVariable(pathVariable)
                 .authentication(authentication)
                 .build();
 

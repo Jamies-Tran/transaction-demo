@@ -26,7 +26,8 @@ public record TransactionRequest(
 
     public record DataRequestSchemaRequest(
             Map<String, Object> params,
-            Map<String, Object> body
+            Map<String, Object> body,
+            List<Object> pathVariable
     ) { }
 
     public record DataResponseSchemaRequest(

@@ -1,5 +1,6 @@
 package com.example.transactionlogdemo.application.dto.response.transaction;
 
+import java.util.List;
 import java.util.Map;
 
 public record TransactionResponse(
@@ -24,7 +25,8 @@ public record TransactionResponse(
 
     public record DataRequestSchemaResponse(
             Map<String, Object> params,
-            Map<String, Object> body
+            Map<String, Object> body,
+            List<Object> pathVariable
     ) { }
 
     public record DataResponseSchemaResponse(
