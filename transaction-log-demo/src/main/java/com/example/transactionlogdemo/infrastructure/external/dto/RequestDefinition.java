@@ -14,6 +14,7 @@ public record RequestDefinition(
         @With
         String uri,
         String transactionId,
+        String transactionCode,
         Map<String, String> header,
         Map<String, Object> body,
         Map<String, Object> params,

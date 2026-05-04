@@ -1,11 +1,11 @@
 package com.example.transactionlogdemo.application.dto.response.test;
 
+import lombok.Builder;
+
+@Builder
 public record Test2Response(
         String name,
-        Info info
+        String phone,
+        String email
 ) {
-    public record Info(
-            String phone,
-            String email
-    ) {}
 }

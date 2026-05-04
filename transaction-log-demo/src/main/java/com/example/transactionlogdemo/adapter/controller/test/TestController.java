@@ -10,6 +10,7 @@ import com.example.transactionlogdemo.application.mapper.request.test.TestReques
 import com.example.transactionlogdemo.application.mapper.response.test.Test2ResponseMapper;
 import com.example.transactionlogdemo.application.mapper.response.test.TestResponseMapper;
 import com.example.transactionlogdemo.domain.entity.test.Test;
+import com.example.transactionlogdemo.domain.entity.test.Test2;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -39,12 +40,19 @@ public class TestController implements TestApi {
     }
 
     @Override
-    public ResponseEntity<TestResponse> test2(Test2Request request) {
+    public ResponseEntity<Test2Response> test2(Test2Request request) {
         log.info("Test receive: {}", request);
-        Test test = request2Mapper.toDomain(request);
-        TestResponse response = responseMapper.toDto(test);
+        Test2 test = request2Mapper.toDomain(request);
+        Test2Response response = response2Mapper.toDto(test);
         log.info("Test response: {}", response);
 
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<Test2Response> test3(String email) {
+        return ResponseEntity.ok(Test2Response.builder()
+                .email(email)
+                .build());
     }
 }

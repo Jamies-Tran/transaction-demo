@@ -134,6 +134,7 @@ public class RouteExecutionUseCase implements RouteExecutionService {
 
         return WorkflowExecutionResult.ExecutionResult.builder()
                 .transactionId(request.transactionId())
+                .transactionCode(request.transactionCode())
                 .dataResult(ObjectMapperUtils.convertToString(response.getBody()))
                 .dataRequest(WorkflowExecutionResult.ExecutionResult.DataRequest.builder()
                         .params(ObjectMapperUtils.convertToString(request.params()))

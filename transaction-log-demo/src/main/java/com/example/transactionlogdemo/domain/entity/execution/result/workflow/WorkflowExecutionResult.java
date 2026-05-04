@@ -22,6 +22,7 @@ public record WorkflowExecutionResult(
     @Builder
     public record ExecutionResult(
             String transactionId,
+            String transactionCode,
             DataRequest dataRequest,
             String dataResult,
             Integer retryCount,

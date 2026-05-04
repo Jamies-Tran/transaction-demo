@@ -2,7 +2,10 @@ package com.example.transactionlogdemo.application.dto.response.test;
 
 public record TestResponse(
         String name,
-        String phone,
-        String email
+        InfoResponse info
 ) {
+    public record InfoResponse(
+            String phone,
+            String email
+    ) {}
 }

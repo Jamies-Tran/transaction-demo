@@ -2,10 +2,9 @@ package com.example.transactionlogdemo.application.dto.request.test;
 
 public record TestRequest(
         String name,
-        String phone,
-        String email
+        InfoRequest info
 ) {
-    public record Info(
+    public record InfoRequest(
             String phone,
             String email
     ) {}

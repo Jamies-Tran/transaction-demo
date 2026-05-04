@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ExecutionResultCollection {
     String transactionId;
+    String transactionCode;
     DataRequest dataRequest;
     String dataResult;
     Integer retryCount;

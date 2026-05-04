@@ -6,10 +6,8 @@ public record Test2Request(
         @NotNull
         String name,
         @NotNull
-        Info info
+        String phone,
+        @NotNull
+        String email
 ) {
-    public record Info(
-            String phone,
-            String email
-    ) {}
 }

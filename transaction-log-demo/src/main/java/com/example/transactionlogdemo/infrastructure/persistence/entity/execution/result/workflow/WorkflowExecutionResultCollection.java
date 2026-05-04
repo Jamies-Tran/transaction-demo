@@ -15,7 +15,7 @@ import java.util.List;
 @Document("workflow_execution_result")
 public class WorkflowExecutionResultCollection {
     String id;
-    String workflowId;
+    String workflowCode;
     LocalDateTime executeAt;
     List<ExecutionResultCollection> executionResults;
 }

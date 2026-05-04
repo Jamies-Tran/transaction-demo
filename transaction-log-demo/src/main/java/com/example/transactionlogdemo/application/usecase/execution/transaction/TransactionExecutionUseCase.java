@@ -92,6 +92,7 @@ public class TransactionExecutionUseCase implements TransactionExecutionService 
 
         return RequestDefinition.builder()
                 .transactionId(transaction.id())
+                .transactionCode(transaction.code())
                 .params(mapParams)
                 .body(mapBody)
                 .authentication(authentication)
