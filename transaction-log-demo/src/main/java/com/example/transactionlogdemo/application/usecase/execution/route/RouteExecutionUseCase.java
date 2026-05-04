@@ -39,7 +39,6 @@ public class RouteExecutionUseCase implements RouteExecutionService {
 
     HttpServletRequest requestServlet;
 
-    // domain chứa object và list log (fail + retry + success)
     @Override
     public RouteExecutionResult execute(
             String routeCode,
@@ -52,7 +51,7 @@ public class RouteExecutionUseCase implements RouteExecutionService {
                     .orElseThrow(RuntimeException::new);
             RequestDefinition completeRequestDefinition = buildCompleteRequestDefinition(route, requestDefinition);
 
-            return executeRequestWithRetry(completeRequestDefinition, retry, results);
+            return executeRequestWithRetry(completeRequestDefinition, retry, retry.maxAttempts(),results);
         } catch (ExecutionException e) {
             results.add(WorkflowExecutionResult.ExecutionResult.builder()
                     .transactionId(requestDefinition.transactionId())
@@ -92,6 +91,7 @@ public class RouteExecutionUseCase implements RouteExecutionService {
     private RouteExecutionResult executeRequestWithRetry(
             RequestDefinition def,
             Transaction.Retry retry,
+            Integer remainRetry,
             List<WorkflowExecutionResult.ExecutionResult> results
     ) {
         try {
@@ -103,22 +103,30 @@ public class RouteExecutionUseCase implements RouteExecutionService {
                     .build();
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             try {
-                boolean allowRetry = switch (e.getStatusCode()) {
+                Boolean statusRetry = switch (e.getStatusCode()) {
                     case HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.BAD_GATEWAY,
                          HttpStatus.GATEWAY_TIMEOUT, HttpStatus.SERVICE_UNAVAILABLE -> true;
                     default -> false;
                 };
-                if (allowRetry && Objects.nonNull(retry) && retry.maxAttempts() > 0) {
-                    log.info("Retry count: {}", retry.maxAttempts());
+                if (statusRetry && remainRetry > 0) {
+                    log.info("Retry count: {}", remainRetry);
                     Thread.sleep(retry.backoff());
-                    int remainRetry = retry.maxAttempts() - 1;
+                    remainRetry = remainRetry - 1;
+                    int retryCount = retry.maxAttempts() - remainRetry;
                     results.add(buildTransactionExecutionResult(def, String.valueOf(e.getStatusCode().value()),
-                            remainRetry, e.getMessage()));
-                    return executeRequestWithRetry(def, retry.withMaxAttempts(remainRetry), results);
+                            retryCount, e.getMessage()));
+                    return executeRequestWithRetry(def, retry, remainRetry, results);
                 }
-                results.add(buildTransactionExecutionResult(def, String.valueOf(e.getStatusCode().value()),
-                        null, e.getMessage()));
-                throw new ExecutionException(e.getMessage());
+
+                if (!statusRetry && (Objects.isNull(remainRetry) || remainRetry <= 0)) {
+                    results.add(buildTransactionExecutionResult(def, String.valueOf(e.getStatusCode().value()),
+                            null, e.getMessage()));
+                }
+
+                //throw new ExecutionException(e.getMessage());
+                return RouteExecutionResult.builder()
+                        .results(results)
+                        .build();
             } catch (InterruptedException ie) {
                 throw e;
             }
@@ -157,6 +165,7 @@ public class RouteExecutionUseCase implements RouteExecutionService {
         long responseAtMillis = System.currentTimeMillis() - requestAtMillis;
         return WorkflowExecutionResult.ExecutionResult.builder()
                 .transactionId(request.transactionId())
+                .transactionCode(request.transactionCode())
                 .dataResult(null)
                 .dataRequest(WorkflowExecutionResult.ExecutionResult.DataRequest.builder()
                         .params(ObjectMapperUtils.convertToString(request.params()))

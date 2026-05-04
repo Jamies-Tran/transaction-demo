@@ -43,6 +43,7 @@ public class TransactionExecutionUseCase implements TransactionExecutionService 
             RouteExecutionResult routeResponse = routeExecutionService.execute(t.routeCode(), requestDefinition,
                     t.retry());
             if (!routeResponse.succeed()) {
+                executionResults.addAll(routeResponse.results());
                 break;
             }
             executionResults.addAll(routeResponse.results());
