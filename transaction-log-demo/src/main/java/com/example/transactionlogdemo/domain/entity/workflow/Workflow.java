@@ -1,15 +1,16 @@
 package com.example.transactionlogdemo.domain.entity.workflow;
 
-import com.example.transactionlogdemo.domain.entity.transaction.Transaction;
 import lombok.With;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public record Workflow(
         String id,
         String code,
         String name,
+        Map<String, Object> dataResultSchema,
         List<WorkflowTransaction> transactions,
         @With Boolean active
 ) {

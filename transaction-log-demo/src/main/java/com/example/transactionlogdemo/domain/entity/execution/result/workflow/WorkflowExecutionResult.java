@@ -4,6 +4,7 @@ import lombok.Builder;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Builder
@@ -11,7 +12,8 @@ public record WorkflowExecutionResult(
         String id,
         String workflowCode,
         LocalDateTime executeAt,
-        List<ExecutionResult> executionResults
+        String executionResult,
+        List<ExecutionLog> executionLogs
 ) {
     public WorkflowExecutionResult {
         if (Objects.isNull(executeAt)) {
@@ -20,7 +22,7 @@ public record WorkflowExecutionResult(
     }
 
     @Builder
-    public record ExecutionResult(
+    public record ExecutionLog(
             String transactionId,
             String transactionCode,
             DataRequest dataRequest,

@@ -11,11 +11,11 @@ import java.util.Objects;
 public record RouteExecutionResult(
         Object responseData,
         Boolean succeed,
-        List<WorkflowExecutionResult.ExecutionResult> results
+        List<WorkflowExecutionResult.ExecutionLog> logs
 ) {
     public RouteExecutionResult {
         if (Objects.isNull(succeed)) {
-            succeed = results.stream().noneMatch(r -> Objects
+            succeed = logs.stream().noneMatch(r -> Objects
                     .equals(r.status(), EnumTransactionResultStatus.ERROR.name()));
         }
     }

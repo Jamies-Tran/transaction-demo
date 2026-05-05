@@ -1,6 +1,6 @@
 package com.example.transactionlogdemo.infrastructure.persistence.entity.execution.result.workflow;
 
-import com.example.transactionlogdemo.infrastructure.persistence.entity.execution.result.transaction.ExecutionResultCollection;
+import com.example.transactionlogdemo.infrastructure.persistence.entity.execution.result.transaction.ExecutionLogCollection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,5 +17,6 @@ public class WorkflowExecutionResultCollection {
     String id;
     String workflowCode;
     LocalDateTime executeAt;
-    List<ExecutionResultCollection> executionResults;
+    String executionResult;
+    List<ExecutionLogCollection> executionLogs;
 }

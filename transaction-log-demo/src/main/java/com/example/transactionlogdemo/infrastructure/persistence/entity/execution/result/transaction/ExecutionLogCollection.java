@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExecutionResultCollection {
+public class ExecutionLogCollection {
     String transactionId;
     String transactionCode;
     DataRequestCollection dataRequestCollection;

@@ -1,6 +1,5 @@
 package com.example.transactionlogdemo.application.dto.response.execution.result.workflow;
 
-import com.example.transactionlogdemo.domain.entity.execution.result.workflow.WorkflowExecutionResult;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDateTime;
@@ -11,10 +10,11 @@ public record WorkflowExecutionResultResponse(
         String workflowCode,
         @JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
         LocalDateTime executeAt,
-        List<ExecutionResultResponse> executionResults
+        String executionResult,
+        List<ExecutionLogResponse> executionLogs
 ) {
 
-    public record ExecutionResultResponse(
+    public record ExecutionLogResponse(
             String transactionId,
             String transactionCode,
             DataRequestResponse dataRequest,

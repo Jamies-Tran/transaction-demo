@@ -45,17 +45,17 @@ public class RouteExecutionUseCase implements RouteExecutionService {
             RequestDefinition requestDefinition,
             Transaction.Retry retry
     ) {
-        List<WorkflowExecutionResult.ExecutionResult> results = new ArrayList<>();
+        List<WorkflowExecutionResult.ExecutionLog> logs = new ArrayList<>();
         try {
             Route route = routeService.getByCode(routeCode)
                     .orElseThrow(RuntimeException::new);
             RequestDefinition completeRequestDefinition = buildCompleteRequestDefinition(route, requestDefinition);
 
-            return executeRequestWithRetry(completeRequestDefinition, retry, retry.maxAttempts(), results);
+            return executeRequestWithRetry(completeRequestDefinition, retry, retry.maxAttempts(), logs);
         } catch (ExecutionException e) {
-            results.add(WorkflowExecutionResult.ExecutionResult.builder()
+            logs.add(WorkflowExecutionResult.ExecutionLog.builder()
                     .transactionId(requestDefinition.transactionId())
-                    .dataRequest(WorkflowExecutionResult.ExecutionResult.DataRequest.builder()
+                    .dataRequest(WorkflowExecutionResult.ExecutionLog.DataRequest.builder()
                             .params(ObjectMapperUtils.convertToString(requestDefinition.params()))
                             .body(ObjectMapperUtils.convertToString(requestDefinition.body()))
                             .build())
@@ -64,7 +64,7 @@ public class RouteExecutionUseCase implements RouteExecutionService {
                     .errSourceName(EnumExecutionErrorSource.TRANSACTION_ERR.getName())
                     .build());
             return RouteExecutionResult.builder()
-                    .results(results)
+                    .logs(logs)
                     .build();
         }
     }
@@ -92,14 +92,14 @@ public class RouteExecutionUseCase implements RouteExecutionService {
             RequestDefinition def,
             Transaction.Retry retry,
             Integer remainRetry,
-            List<WorkflowExecutionResult.ExecutionResult> results
+            List<WorkflowExecutionResult.ExecutionLog> logs
     ) {
         try {
             ResponseEntity<Object> response = routeExternalAdapter.execute(def);
-            results.add(buildTransactionExecutionResult(def, response));
+            logs.add(buildTransactionExecutionResult(def, response));
             return RouteExecutionResult.builder()
                     .responseData(response.getBody())
-                    .results(results)
+                    .logs(logs)
                     .build();
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             try {
@@ -113,19 +113,19 @@ public class RouteExecutionUseCase implements RouteExecutionService {
                     Thread.sleep(retry.backoff());
                     remainRetry = remainRetry - 1;
                     int retryCount = retry.maxAttempts() - remainRetry;
-                    results.add(buildTransactionExecutionResult(def, String.valueOf(e.getStatusCode().value()),
+                    logs.add(buildTransactionExecutionResult(def, String.valueOf(e.getStatusCode().value()),
                             retryCount, e.getMessage()));
-                    return executeRequestWithRetry(def, retry, remainRetry, results);
+                    return executeRequestWithRetry(def, retry, remainRetry, logs);
                 }
 
                 if (!statusRetry && (Objects.isNull(remainRetry) || remainRetry <= 0)) {
-                    results.add(buildTransactionExecutionResult(def, String.valueOf(e.getStatusCode().value()),
+                    logs.add(buildTransactionExecutionResult(def, String.valueOf(e.getStatusCode().value()),
                             null, e.getMessage()));
                 }
 
                 //throw new ExecutionException(e.getMessage());
                 return RouteExecutionResult.builder()
-                        .results(results)
+                        .logs(logs)
                         .build();
             } catch (InterruptedException ie) {
                 throw e;
@@ -133,18 +133,18 @@ public class RouteExecutionUseCase implements RouteExecutionService {
         }
     }
 
-    private WorkflowExecutionResult.ExecutionResult buildTransactionExecutionResult(
+    private WorkflowExecutionResult.ExecutionLog buildTransactionExecutionResult(
             RequestDefinition request,
             ResponseEntity<Object> response
     ) {
         long requestAtMillis = (long) requestServlet.getAttribute("X-Request-At");
         long responseAtMillis = System.currentTimeMillis() - requestAtMillis;
 
-        return WorkflowExecutionResult.ExecutionResult.builder()
+        return WorkflowExecutionResult.ExecutionLog.builder()
                 .transactionId(request.transactionId())
                 .transactionCode(request.transactionCode())
                 .dataResult(ObjectMapperUtils.convertToString(response.getBody()))
-                .dataRequest(WorkflowExecutionResult.ExecutionResult.DataRequest.builder()
+                .dataRequest(WorkflowExecutionResult.ExecutionLog.DataRequest.builder()
                         .params(ObjectMapperUtils.convertToString(request.params()))
                         .body(ObjectMapperUtils.convertToString(request.body()))
                         .build())
@@ -155,7 +155,7 @@ public class RouteExecutionUseCase implements RouteExecutionService {
                 .build();
     }
 
-    private WorkflowExecutionResult.ExecutionResult buildTransactionExecutionResult(
+    private WorkflowExecutionResult.ExecutionLog buildTransactionExecutionResult(
             RequestDefinition request,
             String httpStatusCode,
             Integer retryCount,
@@ -163,11 +163,11 @@ public class RouteExecutionUseCase implements RouteExecutionService {
     ) {
         long requestAtMillis = (long) requestServlet.getAttribute("X-Request-At");
         long responseAtMillis = System.currentTimeMillis() - requestAtMillis;
-        return WorkflowExecutionResult.ExecutionResult.builder()
+        return WorkflowExecutionResult.ExecutionLog.builder()
                 .transactionId(request.transactionId())
                 .transactionCode(request.transactionCode())
                 .dataResult(null)
-                .dataRequest(WorkflowExecutionResult.ExecutionResult.DataRequest.builder()
+                .dataRequest(WorkflowExecutionResult.ExecutionLog.DataRequest.builder()
                         .params(ObjectMapperUtils.convertToString(request.params()))
                         .body(ObjectMapperUtils.convertToString(request.body()))
                         .build())

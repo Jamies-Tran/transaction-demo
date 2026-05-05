@@ -17,7 +17,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -33,32 +32,32 @@ public class TransactionExecutionUseCase implements TransactionExecutionService 
     RouteExecutionService routeExecutionService;
 
     @Override
-    public List<WorkflowExecutionResult.ExecutionResult> execute(
+    public List<WorkflowExecutionResult.ExecutionLog> execute(
             List<Workflow.WorkflowTransaction> transactions,
             ExecutionContext context
     ) {
         LinkedList<Transaction> transactionByOrder = transactionByOrder(transactions);
-        List<WorkflowExecutionResult.ExecutionResult> executionResults = new ArrayList<>();
+        List<WorkflowExecutionResult.ExecutionLog> executionLogs = new ArrayList<>();
         for (Transaction t : transactionByOrder) {
             RequestDefinition requestDefinition = buildRequestDefinitionData(t, context);
             RouteExecutionResult routeResponse = routeExecutionService.execute(t.routeCode(), requestDefinition,
                     t.retry());
             if (!routeResponse.succeed()) {
-                executionResults.addAll(routeResponse.results());
+                executionLogs.addAll(routeResponse.logs());
                 break;
             }
-            executionResults.addAll(routeResponse.results());
-            mapResponse(t.responseSchema().body(), routeResponse.responseData(), context, executionResults);
+            executionLogs.addAll(routeResponse.logs());
+            mapResponse(t.responseSchema().body(), routeResponse.responseData(), context, executionLogs);
         }
 
-        return executionResults;
+        return executionLogs;
     }
 
     private void mapResponse(
             Map<String, Object> mapping,
             Object source,
             ExecutionContext context,
-            List<WorkflowExecutionResult.ExecutionResult> results
+            List<WorkflowExecutionResult.ExecutionLog> results
     ) {
         for (Map.Entry<String, Object> m : mapping.entrySet()) {
             String key = m.getKey();
@@ -68,7 +67,7 @@ public class TransactionExecutionUseCase implements TransactionExecutionService 
                     Object valueMapped = JsonPathUtils.read(source, jsonPath);
                     context.put(key, valueMapped);
                 } catch (Exception e) {
-                    results.add(WorkflowExecutionResult.ExecutionResult.builder()
+                    results.add(WorkflowExecutionResult.ExecutionLog.builder()
                             .errMessage(e.getMessage())
                             .dataResult(ObjectMapperUtils.convertToString(source))
                             .status(EnumTransactionResultStatus.ERROR.name())

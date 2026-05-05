@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -16,6 +17,7 @@ public class WorkflowCollection {
     String id;
     String name;
     String code;
+    Map<String, Object> dataResultSchema;
     List<WorkflowTransactionCollection> transactions;
     Boolean active;
 }

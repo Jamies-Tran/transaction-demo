@@ -7,6 +7,6 @@ import com.example.transactionlogdemo.domain.entity.workflow.Workflow;
 import java.util.List;
 
 public interface TransactionExecutionService {
-    List<WorkflowExecutionResult.ExecutionResult> execute(List<Workflow.WorkflowTransaction> transactions,
-                                                          ExecutionContext context);
+    List<WorkflowExecutionResult.ExecutionLog> execute(List<Workflow.WorkflowTransaction> transactions,
+                                                       ExecutionContext context);
 }
