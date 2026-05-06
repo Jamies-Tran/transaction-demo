@@ -42,7 +42,10 @@ public class WorkflowExecutionUseCase implements WorkflowExecutionService {
 
         List<WorkflowExecutionResult.ExecutionLog> executionLogs =
                 transactionExecutionService.execute(workflow.transactions(), context);
-        Map<String, Object> dataExecutionMapped = context.getData();
+        Map<String, Object> dataExecutionMapped = new HashMap<>();
+        if (CollectionUtils.isEmpty(workflow.dataResultSchema())) {
+            dataExecutionMapped = context.getData();
+        }
         if (!CollectionUtils.isEmpty(workflow.dataResultSchema())) {
             mapExecutionResult(workflow.dataResultSchema(), context.getData(),
                     dataExecutionMapped);
