@@ -103,27 +103,26 @@ public class RouteExecutionUseCase implements RouteExecutionService {
                     .build();
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             try {
-                Boolean statusRetry = switch (e.getStatusCode()) {
-                    case HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.BAD_GATEWAY,
-                         HttpStatus.GATEWAY_TIMEOUT, HttpStatus.SERVICE_UNAVAILABLE -> true;
-                    default -> false;
-                };
-                if (statusRetry && remainRetry > 0) {
-                    log.info("Retry count: {}", remainRetry);
-                    Thread.sleep(retry.backoff());
-                    remainRetry = remainRetry - 1;
-                    int retryCount = retry.maxAttempts() - remainRetry;
-                    logs.add(buildTransactionExecutionResult(def, String.valueOf(e.getStatusCode().value()),
-                            retryCount, e.getMessage()));
-                    return executeRequestWithRetry(def, retry, remainRetry, logs);
-                }
+                if (remainRetry > 0) {
+                    Boolean statusRetry = switch (e.getStatusCode()) {
+                        case HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.BAD_GATEWAY,
+                             HttpStatus.GATEWAY_TIMEOUT, HttpStatus.SERVICE_UNAVAILABLE -> true;
+                        default -> false;
+                    };
+                    if (statusRetry) {
+                        log.info("Retry count: {}", remainRetry);
+                        Thread.sleep(retry.backoff());
+                        remainRetry = remainRetry - 1;
+                        int retryCount = retry.maxAttempts() - remainRetry;
+                        logs.add(buildTransactionExecutionResult(def, String.valueOf(e.getStatusCode().value()),
+                                retryCount, e.getMessage()));
+                        return executeRequestWithRetry(def, retry, remainRetry, logs);
+                    }
 
-                if (!statusRetry && (Objects.isNull(remainRetry) || remainRetry <= 0)) {
                     logs.add(buildTransactionExecutionResult(def, String.valueOf(e.getStatusCode().value()),
                             null, e.getMessage()));
                 }
 
-                //throw new ExecutionException(e.getMessage());
                 return RouteExecutionResult.builder()
                         .logs(logs)
                         .build();

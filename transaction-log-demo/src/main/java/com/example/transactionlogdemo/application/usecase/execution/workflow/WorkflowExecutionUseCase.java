@@ -70,8 +70,13 @@ public class WorkflowExecutionUseCase implements WorkflowExecutionService {
             String key = entry.getKey();
             Object value = entry.getValue();
             if (value instanceof String jsonPath) {
-                Object valueMapped = JsonPathUtils.read(source, jsonPath);
-                result.put(key, valueMapped);
+                Object valueMapped;
+                try {
+                    valueMapped = JsonPathUtils.read(source, jsonPath);
+                    result.put(key, valueMapped);
+                } catch (Exception e) {
+                }
+
             }
             if (value instanceof Map<?,?> map) {
                 mapExecutionResult((Map<String, Object>) map, source, result);
